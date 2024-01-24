@@ -370,7 +370,7 @@ def main_segmentation_map():
                                  level='warning')
                 #df[df_idx] = {"ID": str(patient_id), "seg_count": len(cfg.structures_uncompound_list)+1}
                 #df_idx +=1
-                df.loc[len(df)] = {"ID": str(patient_id), "seg_count": len(cfg.structures_uncompound_list)+1}
+                df.loc[len(df)] = {"ID": str(patient_id), "seg_count": len(cfg.structures_uncompound_list)}
                 #df = pd.concat([df, pd.DataFrame()], ignore_index=True)
             
             elif not np.all(
