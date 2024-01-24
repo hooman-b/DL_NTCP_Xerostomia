@@ -37,15 +37,15 @@ if __name__ == '__main__':
     data_collection.main()
 
 
-    #The following checks can be skipped
-    logger.my_print('Running check_rtstruct...')
-    check_rtstruct.main()  # may be skipped
+    # #The following checks can be skipped
+    # logger.my_print('Running check_rtstruct...')
+    # check_rtstruct.main()  # may be skipped
     
-    logger.my_print('Running check_rtdose...')
-    check_rtdose.main()  # can be skipped
+    # logger.my_print('Running check_rtdose...')
+    # check_rtdose.main()  # can be skipped
     
-    logger.my_print('Running check_data...')
-    check_data.main()  # can be skipped
+    # logger.my_print('Running check_data...')
+    # check_data.main()  # can be skipped
 
 
     logger.my_print('Running data_preproc_ct_rtdose...')

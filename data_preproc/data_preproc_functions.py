@@ -65,7 +65,15 @@ def copy_folder(src, dst):
     """
     # Recursively copy an the content of a directory tree rooted at src to a directory named dst. The 'dirs_exist_ok'
     # argument dictates whether to raise an exception in case dst or any missing parent directory already exists.
-    shutil.copytree(src, dst, dirs_exist_ok=True)
+    # Hooman: The Python version I am using 3.7.10 does NOT supported 'dirs_exist_ok'. Consequently, I will change 
+    # this function to the following form.
+    # shutil.copytree(src, dst, dirs_exist_ok=True)
+    try:
+        shutil.copytree(src, dst)
+
+    except FileExistsError:
+        # Handle the situation when the destination directory already exists
+        print(f"Destination directory '{dst}' already exists. Skipping copy.")
 
 
 def copy_file(src, dst):
