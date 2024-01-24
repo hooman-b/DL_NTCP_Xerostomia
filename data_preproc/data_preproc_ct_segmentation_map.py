@@ -256,6 +256,10 @@ def main_segmentation_map():
         if cfg.test_patients_list is not None:
             test_patients_list = cfg.test_patients_list
             patients_list = [x for x in test_patients_list if x in patients_list]
+        
+        # Add a dataframe for segmentation count of each patient
+        df = pd.DataFrame(columns=["ID", "seg_count"])
+        df_idx = 0        
 
         for patient_id in tqdm(patients_list):
             logger.my_print('Patient_id: {}'.format(patient_id))
@@ -361,7 +365,15 @@ def main_segmentation_map():
             # expected list of unique values, i.e. [0, 1, ..., len(cfg.structures_uncompound_list)]. +1 is for background
             # Normally those lists should be identical, but patient_id = 3573430 has no crico, esophagus_cerv and
             # thyroid, neither in CITOR nor in DLC.
-            if not np.all(
+            if len(np.unique(output_segmentation_map)) != len(cfg.structures_uncompound_list) + 1:
+                logger.my_print('lengths of np.unique(output_segmentation_map) and cfg.structures_uncompound_list not consistent',
+                                 level='warning')
+                #df[df_idx] = {"ID": str(patient_id), "seg_count": len(cfg.structures_uncompound_list)+1}
+                #df_idx +=1
+                df.loc[len(df)] = {"ID": str(patient_id), "seg_count": len(cfg.structures_uncompound_list)+1}
+                #df = pd.concat([df, pd.DataFrame()], ignore_index=True)
+            
+            elif not np.all(
                 np.unique(output_segmentation_map) == [x for x in range(1 + len(cfg.structures_uncompound_list))]):
                 logger.my_print('np.unique(output_segmentation_map): {}'.format(np.unique(output_segmentation_map)),
                                 level='warning')
@@ -376,6 +388,7 @@ def main_segmentation_map():
             logger.my_print('output_segmentation_map.shape: {}'.format(output_segmentation_map.shape))
             np.save(file=os.path.join(save_path, cfg.filename_segmentation_map_npy), arr=output_segmentation_map)
 
+    df.to_csv(os.path.join(save_root_dir, "segmentation_unique_counts.csv"), sep=';')
     end = time.time()
     logger.my_print('Elapsed time: {time} seconds'.format(time=round(end - start, 3)))
     logger.my_print('DONE!')

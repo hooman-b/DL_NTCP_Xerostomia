@@ -37,45 +37,45 @@ if __name__ == '__main__':
     data_collection.main()
 
 
-    # # The following checks can be skipped
-    # # logger.my_print('Running check_rtstruct...')
-    # # check_rtstruct.main()  # may be skipped
-    # #
-    # # logger.my_print('Running check_rtdose...')
-    # # check_rtdose.main()  # can be skipped
-    # #
-    # # logger.my_print('Running check_data...')
-    # # check_data.main()  # can be skipped
+    #The following checks can be skipped
+    logger.my_print('Running check_rtstruct...')
+    check_rtstruct.main()  # may be skipped
+    
+    logger.my_print('Running check_rtdose...')
+    check_rtdose.main()  # can be skipped
+    
+    logger.my_print('Running check_data...')
+    check_data.main()  # can be skipped
 
 
-    # logger.my_print('Running data_preproc_ct_rtdose...')
-    # data_preproc_ct_rtdose.main()
+    logger.my_print('Running data_preproc_ct_rtdose...')
+    data_preproc_ct_rtdose.main()
 
-    # logger.my_print('Running check_data_preproc_ct_rtdose...')
-    # check_data_preproc_ct_rtdose.main()
+    logger.my_print('Running check_data_preproc_ct_rtdose...')
+    check_data_preproc_ct_rtdose.main()
 
-    # logger.my_print('Running data_preproc_segmentation_map_citor...')
-    # data_preproc_ct_segmentation_map_citor.main()
-    #
-    # logger.my_print('Running data_preproc_ct_segmentation_map_dlc...')
-    # data_preproc_ct_segmentation_map_dlc.main()
-    #
-    # logger.my_print('Running data_preproc_ct_segmentation_map...')
-    # data_preproc_ct_segmentation_map.main()
-    #
-    # logger.my_print('Running check_data_preproc_ct_segmentation_map...')
-    # check_data_preproc_ct_segmentation_map.main()
+    logger.my_print('Running data_preproc_segmentation_map_citor...')
+    data_preproc_ct_segmentation_map_citor.main()
+    
+    logger.my_print('Running data_preproc_ct_segmentation_map_dlc...')
+    data_preproc_ct_segmentation_map_dlc.main()
+    
+    logger.my_print('Running data_preproc_ct_segmentation_map...')
+    data_preproc_ct_segmentation_map.main()
+    
+    logger.my_print('Running check_data_preproc_ct_segmentation_map...')
+    check_data_preproc_ct_segmentation_map.main()
 
-    # logger.my_print('Running data_preproc...')
-    # data_preproc.main()
+    logger.my_print('Running data_preproc...')
+    data_preproc.main()
 
     logger.my_print('Running check_data_preproc...')
     check_data_preproc.main()
-    #
-    # logger.my_print('Running data_preproc_exclude_patients...')
-    # # Note: if len(test_patients_list) > 0, but we need exclude_patients.csv for all patients, then Search for:
-    # # `# TODO: temporary: consider all patients, for exclude_patients.csv`, and uncomment/enable the code lines.
-    # data_preproc_exclude_patients.main()
+    
+    logger.my_print('Running data_preproc_exclude_patients...')
+    # Note: if len(test_patients_list) > 0, but we need exclude_patients.csv for all patients, then Search for:
+    # `# TODO: temporary: consider all patients, for exclude_patients.csv`, and uncomment/enable the code lines.
+    data_preproc_exclude_patients.main()
 
     end = time.time()
     logger.my_print('Elapsed time: {time} seconds'.format(time=round(end - start, 3)))

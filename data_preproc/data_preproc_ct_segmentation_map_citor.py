@@ -176,37 +176,37 @@ def get_segmentation_map(contours, slices, image, modify_structure, logger):
         segmentation_map_i = np.zeros_like(output_segmentation_map, dtype=output_segmentation_map.dtype)
         if modify_structure(structure=con['name'], logger=logger) in cfg.structures_uncompound_list:
             for c in con['contours']:
-                # try:
-                nodes = np.array(c).reshape((-1, 3))
-                assert np.amax(np.abs(np.diff(nodes[:, 2]))) == 0
-                # nodes[0, 2] = z-coordinate in physical space (e.g. 52.7)
-                # z_index = 2 if z = [47.7, 50.2, 52.7, ...] and nodes[0, 2] = 52.7
-                z_index = z.index(nodes[0, 2])
-                y = (nodes[:, 1] - pos_y) / spacing_y
-                x = (nodes[:, 0] - pos_x) / spacing_x
+                try:
+                    nodes = np.array(c).reshape((-1, 3))
+                    assert np.amax(np.abs(np.diff(nodes[:, 2]))) == 0
+                    # nodes[0, 2] = z-coordinate in physical space (e.g. 52.7)
+                    # z_index = 2 if z = [47.7, 50.2, 52.7, ...] and nodes[0, 2] = 52.7
+                    z_index = z.index(nodes[0, 2])
+                    y = (nodes[:, 1] - pos_y) / spacing_y
+                    x = (nodes[:, 0] - pos_x) / spacing_x
 
-                if cfg.unfill_holes:
-                    # Extract contours only outline, so not filled. Will be filled when each contour of
-                    # the structure has been extracted (see fill_contour() below)
-                    yx = [(y, x) for y, x in zip(y, x)]
-                    # Initiate empty image
-                    image_segmentation_map_i = Image.fromarray(np.zeros_like(segmentation_map_i[:, :, z_index],
-                                                                             dtype=np.uint8))
-                    # Draw contour outline on image_segmentation_map
-                    draw = ImageDraw.Draw(image_segmentation_map_i)
-                    draw.polygon(yx, fill=0, outline=1)
+                    if cfg.unfill_holes:
+                        # Extract contours only outline, so not filled. Will be filled when each contour of
+                        # the structure has been extracted (see fill_contour() below)
+                        yx = [(y, x) for y, x in zip(y, x)]
+                        # Initiate empty image
+                        image_segmentation_map_i = Image.fromarray(np.zeros_like(segmentation_map_i[:, :, z_index],
+                                                                                dtype=np.uint8))
+                        # Draw contour outline on image_segmentation_map
+                        draw = ImageDraw.Draw(image_segmentation_map_i)
+                        draw.polygon(yx, fill=0, outline=1)
 
-                    # Add contour outline to segmentation_map_i
-                    # Use mask, because contours of the same structure may still overlap!
-                    mask = (segmentation_map_i[:, :, z_index] == 0)
-                    contour = ((np.array(image_segmentation_map_i) > 0) * num).astype(segmentation_map_i.dtype)
-                    segmentation_map_i[:, :, z_index] += mask * contour
-                else:
-                    # Fill contour + holes
-                    xx, yy = polygon(x, y)
-                    output_segmentation_map[xx, yy, z_index] = num
-                # except:
-                #     has_structure_con_issues_i = True
+                        # Add contour outline to segmentation_map_i
+                        # Use mask, because contours of the same structure may still overlap!
+                        mask = (segmentation_map_i[:, :, z_index] == 0)
+                        contour = ((np.array(image_segmentation_map_i) > 0) * num).astype(segmentation_map_i.dtype)
+                        segmentation_map_i[:, :, z_index] += mask * contour
+                    else:
+                        # Fill contour + holes
+                        xx, yy = polygon(x, y)
+                        output_segmentation_map[xx, yy, z_index] = num
+                except:
+                    has_structure_con_issues_i = True
 
             # Fill outline, but not holes
             if cfg.unfill_holes:
@@ -989,7 +989,7 @@ def main_patients_get_dlc():
 
 
 def main():
-    # main_segmentation_map()
+    main_segmentation_map()
     main_best_segmentation_map()
     main_overview_all_segmentation_map()
     main_overview_segmentation_map(data_dir_segmentation_map=cfg.save_dir_segmentation_map_citor,
