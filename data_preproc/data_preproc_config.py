@@ -304,3 +304,9 @@ segmentation_colorbar_title = ''
 
 # Run whole data_preproc pipeline for a small number of patients, useful for testing
 test_patients_list = ['0020715', '3573430']  # None  # ['0276627']
+
+#######################################
+##### WeeklyCt Parameters #####
+# Here, I will add some of the parameters used to preprocess WeeklyCTs
+# dicom_processed
+save_dir_weeklyct = save_dir
