@@ -309,4 +309,8 @@ test_patients_list = ['0020715', '3573430']  # None  # ['0276627']
 ##### WeeklyCt Parameters #####
 # Here, I will add some of the parameters used to preprocess WeeklyCTs
 # dicom_processed
-save_dir_weeklyct = save_dir
+save_dir_weeklyct = save_dir # path to store the raw weeklyCTs images.
+weeklyct_dir = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/OPC_data/ART Hooman/Hooman_project_data/Registered_WeeklyCTs'
+weeklyct_folder_name = 'w3CT_reg_bsl' # Name of the folder one saved all the regisered weeklyCTs in.
+filename_weeklyct_metadata_json = 'weeklyct_metadata.json'  # meta-data of the WeeklyCT data
+filename_weeklyct_npy = 'weeklyct.npy'  # WeeklyCT (Numpy array)
