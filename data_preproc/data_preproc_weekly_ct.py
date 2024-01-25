@@ -26,6 +26,7 @@ from tqdm import tqdm
 from pydicom import dcmread
 
 import data_preproc_config as cfg
+from data_preproc import get_single_channel_array
 from data_preproc_ct_rtdose import load_ct
 from data_preproc_functions import create_folder_if_not_exists, get_all_folders, Logger, set_default, sort_human
 
@@ -154,7 +155,92 @@ def preprocess_weeklyct_array():
     To avoid confusion for the users, this function will perform almost the same
     operation as main_array() function did on the Baseline CTs' arrays.
     """
-    pass
+    # Initialize variables
+    use_umcg = cfg.use_umcg
+    mode_list = cfg.mode_list
+    data_dir_mode_list = cfg.save_dir_mode_list
+    patient_id_length = cfg.patient_id_length
+    save_root_dir = cfg.save_root_dir
+    save_dir_ct = cfg.save_dir_ct
+    save_dir_dataset_full = cfg.save_dir_dataset_full
+
+    # Initialize WeeklyCT variables
+    save_dir_weeklyct = cfg.save_dir_weeklyct
+    filename_weeklyct_metadata_json = cfg.filename_weeklyct_metadata_json
+    filename_weeklyct_npy = cfg.filename_weeklyct_npy
+
+    logger = Logger(os.path.join(save_root_dir, cfg.filename_data_preproc_array_logging_txt))
+    bb_size = cfg.bb_size
+    start = time.time()
+
+    # Create folder if not exist
+    create_folder_if_not_exists(save_dir_dataset_full)
+
+    for _, d_i in zip(mode_list, data_dir_mode_list):
+
+        # Check whether we have the same number of patients for weekly and Baseline CTs.
+        patients_list_ct = os.listdir(save_dir_ct)
+        patients_list_weeklyct = os.listdir(save_dir_weeklyct)
+
+        assert patients_list_ct == patients_list_weeklyct
+
+        patients_list = patients_list_ct
+        n_patients = len(patients_list)
+        logger.my_print('Total number of patients: {n}'.format(n=n_patients))
+
+        # Load cropping regions of all patients
+        if cfg.perform_cropping:
+            cropping_regions = pd.read_csv(os.path.join(save_root_dir, cfg.filename_cropping_regions_csv),
+                                           sep=';', index_col=0)
+            # Convert filtered Pandas column to list, and convert patient_id = 111766 (type=int, because of Excel/csv file)
+            # to patient_id = '0111766' (type=str)
+            cropping_regions_index_name = cropping_regions.index.name
+            cropping_regions.index = ['%0.{}d'.format(patient_id_length) % x for x in cropping_regions.index]
+            cropping_regions.index.name = cropping_regions_index_name
+
+        # Testing for a small number of patients
+        if cfg.test_patients_list is not None:
+            test_patients_list = cfg.test_patients_list
+            patients_list = [x for x in test_patients_list if x in patients_list]
+
+        for patient_id in tqdm(patients_list):
+            logger.my_print('Patient_id: {id}'.format(id=patient_id))
+
+            # Load ct_metadata, for performing spacing_correction
+            weeklyct_metadata = None
+            if cfg.perform_spacing_correction:
+                weeklyct_metadata_path = os.path.join(save_dir_weeklyct, patient_id, filename_weeklyct_metadata_json)
+                json_file = open(weeklyct_metadata_path)
+                weeklyct_metadata = json.load(json_file)
+                logger.my_print('\tct_metadata["Spacing"][::-1] (input): {}'.format(weeklyct_metadata["Spacing"][::-1]))
+                logger.my_print('\tcfg.spacing[::-1] (output): {}'.format(cfg.spacing[::-1]))
+
+            # Extract cropping region
+            cropping_region_i = None
+            if cfg.perform_cropping:
+                cropping_region_i = cropping_regions.loc[patient_id].to_dict()
+
+            # Load and preprocess WeeklyCT
+            logger.my_print('\t----- WeeklyCT -----')
+            weeklyct_arr_path = os.path.join(save_dir_weeklyct, patient_id, filename_weeklyct_npy)
+            weeklyct_arr = get_single_channel_array(arr_path=weeklyct_arr_path, dtype=None, metadata=weeklyct_metadata, is_label=False,
+                                              cropping_region=cropping_region_i,
+                                              bb_size=bb_size,
+                                              perform_spacing_correction=cfg.perform_spacing_correction,
+                                              perform_cropping=cfg.perform_cropping,
+                                              perform_clipping=cfg.perform_clipping,
+                                              perform_transformation=cfg.perform_transformation, logger=logger)
+
+            # Save as Numpy array
+            save_dir_dataset_full_i = os.path.join(save_dir_dataset_full, patient_id)
+            create_folder_if_not_exists(save_dir_dataset_full_i)
+            np.save(file=os.path.join(save_dir_dataset_full_i, 'weeklyct.npy'), arr=weeklyct_arr)
+
+    end = time.time()
+    logger.my_print('Elapsed time: {time} seconds'.format(time=round(end - start, 3)))
+    logger.my_print('DONE!')
+
+
 def main():
     save_ct_arr()
     preprocess_weeklyct_array()
