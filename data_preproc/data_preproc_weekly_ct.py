@@ -28,7 +28,7 @@ from pydicom import dcmread
 import data_preproc_config as cfg
 from data_preproc import get_single_channel_array
 from data_preproc_ct_rtdose import load_ct
-from data_preproc_functions import create_folder_if_not_exists, copy_folder, Logger, set_default, sort_human
+from data_preproc_functions import create_folder_if_not_exists, copy_file, Logger, set_default, sort_human
 
 def get_weeklyct_path(path, weeklyct_folder_name, logger):
     """
@@ -108,7 +108,7 @@ def save_ct_arr():
             patient_weeklyct_path = get_weeklyct_path(main_path, weeklyct_folder_name, logger)
 
             # Check
-            assert len(patient_weeklyct_path) == 1
+            assert len(patient_weeklyct_path) > 0 
 
             # Load WeeklyCTs
             logger.my_print('\tLoading Pydicom Images (WeeklyCT)...')
@@ -297,7 +297,7 @@ def preprocess_weeklyct_dataset():
                 # Copy WeeklyCT file from dataset_full to dataset/0 and dataset/1
                 src = os.path.join(save_dir_dataset_full, patient_id, 'weeklyct.npy')
                 dst = os.path.join(save_dir_dataset_label, patient_id, 'weeklyct.npy')
-                copy_folder(src, dst)
+                copy_file(src, dst)
 
     end = time.time()
     logger.my_print('Elapsed time: {time} seconds'.format(time=round(end - start, 3)))

@@ -74,6 +74,10 @@ def copy_folder(src, dst):
     except FileExistsError:
         # Handle the situation when the destination directory already exists
         print(f"Destination directory '{dst}' already exists. Skipping copy.")
+    
+    except NotADirectoryError:
+        # Handle the situation when the destination directory already exists
+        print(f"The directory name is invalid {src}")        
 
 
 def copy_file(src, dst):
