@@ -240,10 +240,17 @@ def preprocess_weeklyct_array():
     logger.my_print('Elapsed time: {time} seconds'.format(time=round(end - start, 3)))
     logger.my_print('DONE!')
 
+def preprocess_weeklyct_dataset():
+    """
+    This function is similar to data_preproc.main_dataset(), and it adds weeklyCTs
+    to their right label folder.
+    """
+    pass
 
 def main():
     save_ct_arr()
     preprocess_weeklyct_array()
+    preprocess_weeklyct_dataset()
 
 if __name__ == '__main__':
     main()
