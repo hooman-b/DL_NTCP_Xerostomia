@@ -31,7 +31,7 @@ from data_preproc_functions import create_folder_if_not_exists, get_all_folders,
 
 def get_weeklyct_path(path, weeklyct_folder_name, logger):
     """
-    Write dosumentation
+    Write documentation
     """
     for r, d, f in os.walk(path):
         # Make a list from all the directories 
@@ -54,7 +54,7 @@ def get_weeklyct_path(path, weeklyct_folder_name, logger):
     
 def save_ct_arr():
     """
-    Write dosumentation
+    Write documentation
     """    
     # Initialize variables
     use_umcg = cfg.use_umcg
@@ -149,13 +149,15 @@ def save_ct_arr():
     logger.my_print('Elapsed time: {} seconds'.format(round(end - start, 3)))
     logger.my_print('DONE!')            
 
-
-
-
-    
-
+def preprocess_weeklyct_array():
+    """
+    To avoid confusion for the users, this function will perform almost the same
+    operation as main_array() function did on the Baseline CTs' arrays.
+    """
+    pass
 def main():
     save_ct_arr()
+    preprocess_weeklyct_array()
 
 if __name__ == '__main__':
     main()
