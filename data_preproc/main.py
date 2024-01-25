@@ -11,6 +11,7 @@ import data_preproc_ct_segmentation_map_citor
 import data_preproc_ct_segmentation_map_dlc
 import data_preproc_ct_segmentation_map
 import data_preproc
+import data_preproc_weekly_ct
 import data_preproc_exclude_patients
 import checks.check_folder_structure as check_folder_structure
 import checks.check_rtstruct as check_rtstruct
@@ -71,6 +72,9 @@ if __name__ == '__main__':
 
     logger.my_print('Running check_data_preproc...')
     check_data_preproc.main()
+
+    logger.my_print('Running data_preproc_weekly_ct...')
+    data_preproc_weekly_ct.main()
     
     logger.my_print('Running data_preproc_exclude_patients...')
     # Note: if len(test_patients_list) > 0, but we need exclude_patients.csv for all patients, then Search for:
