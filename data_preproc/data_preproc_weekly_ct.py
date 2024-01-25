@@ -28,7 +28,7 @@ from pydicom import dcmread
 import data_preproc_config as cfg
 from data_preproc import get_single_channel_array
 from data_preproc_ct_rtdose import load_ct
-from data_preproc_functions import create_folder_if_not_exists, get_all_folders, Logger, set_default, sort_human
+from data_preproc_functions import create_folder_if_not_exists, copy_folder, Logger, set_default, sort_human
 
 def get_weeklyct_path(path, weeklyct_folder_name, logger):
     """
@@ -245,7 +245,63 @@ def preprocess_weeklyct_dataset():
     This function is similar to data_preproc.main_dataset(), and it adds weeklyCTs
     to their right label folder.
     """
-    pass
+    # Initialize variables
+    use_umcg = cfg.use_umcg
+    mode_list = cfg.mode_list
+    data_dir_mode_list = cfg.save_dir_mode_list
+    patient_id_length = cfg.patient_id_length
+
+    save_root_dir = cfg.save_root_dir
+    save_dir_dataset_full = cfg.save_dir_dataset_full
+
+    save_dir_dataset = cfg.save_dir_dataset
+
+    patient_id_col = cfg.patient_id_col
+    logger = Logger(os.path.join(save_root_dir, cfg.filename_data_preproc_features_logging_txt))
+    start = time.time()
+
+    # Create folder if not exist
+    create_folder_if_not_exists(save_dir_dataset)
+
+    for _, d_i in zip(mode_list, data_dir_mode_list):
+
+        # Load Excel file containing patient_id and their endpoints/labels/targets
+        endpoints_csv = os.path.join(save_root_dir, cfg.filename_endpoints_csv)
+        df = pd.read_csv(endpoints_csv, sep=';')
+
+        # Check whether the file is seperated with ','
+        if len(df.columns) == 1:
+            df = pd.read_csv(endpoints_csv, sep=',')
+
+        # Create dictionary for the labels 
+        labels_patients_dict = dict()
+        # Convert filtered Pandas column to list, and convert patient_id = 111766 (type=int,
+        # because of Excel/csv file) to patient_id = '0111766' (type=str)
+        labels_patients_dict['0'] = ['%0.{}d'.format(patient_id_length) % x for x in
+                                     df[df[cfg.endpoint] == 0][patient_id_col].tolist()]
+        labels_patients_dict['1'] = ['%0.{}d'.format(patient_id_length) % x for x in
+                                     df[df[cfg.endpoint] == 1][patient_id_col].tolist()]
+
+        for label, patients_list in labels_patients_dict.items():
+            save_dir_dataset_label = os.path.join(save_dir_dataset, str(label))
+            create_folder_if_not_exists(save_dir_dataset_label)
+
+            # Testing for a small number of patients
+            if cfg.test_patients_list is not None:
+                test_patients_list = cfg.test_patients_list
+                patients_list = [x for x in test_patients_list if x in patients_list]        
+
+            for patient_id in tqdm(patients_list):
+                logger.my_print('Patient_id: {id}'.format(id=patient_id))
+
+                # Copy WeeklyCT file from dataset_full to dataset/0 and dataset/1
+                src = os.path.join(save_dir_dataset_full, patient_id, 'weeklyct.npy')
+                dst = os.path.join(save_dir_dataset_label, patient_id, 'weeklyct.npy')
+                copy_folder(src, dst)
+
+    end = time.time()
+    logger.my_print('Elapsed time: {time} seconds'.format(time=round(end - start, 3)))
+    logger.my_print('DONE!')            
 
 def main():
     save_ct_arr()
