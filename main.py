@@ -718,9 +718,6 @@ if __name__ == '__main__':
                                use_bias=use_bias, pretrained_path=pretrained_path_i, logger=logger)
         model.to(device=device)
 
-        # Compile model (PyTorch 2)
-        if torch_version.startswith('2.'):
-            model = torch.compile(model)
 
         # Weight initialization
         if 'selu' in model_name:
@@ -761,6 +758,10 @@ if __name__ == '__main__':
         loss_function = misc.get_loss_function(loss_function_name=loss_function_name, label_weights=label_weights,
                                                label_smoothing=label_smoothing, loss_weights=loss_weights,
                                                device=device)
+
+        # Compile model (PyTorch 2) #########################
+        # if torch_version.startswith('2.') and not os.name == 'nt':
+        #     model = torch.compile(model)
 
         # Collect model's gradients and topology
         # wandb.watch(model, loss_function, log_freq=1, log='all')

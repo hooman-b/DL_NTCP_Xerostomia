@@ -29,7 +29,7 @@ import data_preproc.data_preproc_config as data_preproc_config
 from data_preproc.data_preproc_functions import create_folder_if_not_exists
 
 # Whether to perform quick run for checking workability of code or not
-perform_test_run = True
+perform_test_run = True # 
 
 # Set directory contexts
 root_path = os.getcwd()
@@ -59,9 +59,9 @@ filename_best_model_pth = 'best_model.pth'
 filename_results_png = 'results.png'
 
 # Basic config
-wandb_mode = 'disabled'  # 'online' | 'offline' | 'disabled'
+wandb_mode = 'disabled'  # 'online' | 'offline' | 'disabled' # Is a nice platform that helps visualize the model performance
 torch_version = torch.__version__
-seed = 4
+seed = 4 # This seed is just for reproducibility.
 nr_of_decimals = 3
 
 # Decide which device we want to run on
@@ -69,7 +69,7 @@ gpu_condition = torch.cuda.is_available()
 device = torch.device('cuda') if gpu_condition else torch.device('cpu')
 cudnn_benchmark = False  # True if gpu_condition else False  # `True` will be faster, but potentially at cost of reproducibility
 # This flag allows us to enable the inbuilt CuDNN auto-tuner to find the best algorithm to use for our hardware. 
-# Only enable if input sizes of our network do not vary.
+# Only enable if input sizes of our network do not vary. ####### Ask about this one.
 
 # Data config
 train_frac = 0.7  # training-internal_validation-test split. The same test set will be used for Cross-Validation.
@@ -85,7 +85,7 @@ cv_type = 'stratified'  # (Stratified CV, only if cv_folds > 1) None | 'stratifi
 dataset_type = 'cache'  # 'standard' | 'cache' | 'persistent'. If None, then 'standard'.
 # Cache: caches data in RAM storage. Persistent: caches data in disk storage instead of RAM storage.
 cache_rate = 1.0  # (dataset_type='cache')
-num_workers = 0  # `4 * num_GPUs` (dataset_type='cache')
+num_workers = 4  # `4 * num_GPUs` (dataset_type='cache') # 8 or ten will be faster
 pin_memory = True if num_workers > 0 else False  # Do not change
 to_device = False  # if num_workers > 0 else True  # Whether or not to apply `ToDeviced()` in Dataset' transforms.
 # See load_data.py. Suggestion: set True on HPC, set False on local computer.
@@ -262,7 +262,7 @@ if perform_test_run:
     lr_finder_num_iter = 0
     n_samples = 40
     nr_runs = 1
-    max_epochs = 1
+    max_epochs = 2
     train_frac = 0.33
     val_frac = 0.33
     cv_folds = 1
