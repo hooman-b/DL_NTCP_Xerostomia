@@ -135,7 +135,6 @@ def main_segmentation_map():
 
             # Get all folders and sub-folders
             all_folders_ct = get_all_folders(os.path.join(data_dir_ct, patient_id, folder_type_i))
-            all_folders_dlc = get_all_folders(os.path.join(data_dir_dlc, patient_id, folder_type_i))
 
             # Get CT folder
             # Assumption: patients only have one CT folder
@@ -158,26 +157,36 @@ def main_segmentation_map():
             logger.my_print('Number of CT slices: {n}'.format(n=len(slices)))
             image = np.stack([s.pixel_array for s in slices], axis=-1)
 
-            # Get RTSTRUCT file
-            if use_umcg:
-                path_rtss = [x for x in all_folders_dlc if x.endswith('\\RTSTRUCT')]
+            ###################
+            # If using another dataset with another structure one can use the following code
+            try:
+                all_folders_dlc = get_all_folders(os.path.join(data_dir_dlc, patient_id, folder_type_i))
+                # Get RTSTRUCT file
+                if use_umcg:
+                    path_rtss = [x for x in all_folders_dlc if x.endswith('\\RTSTRUCT')]
 
-                # 'with_contrast' has highest priority: if it does not contain one or more of the required folders,
-                # then search in 'no_contrast'
-                if len(path_rtss) == 0:
-                    all_folders_dlc_2 = get_all_folders(os.path.join(data_dir_dlc, patient_id, patient_folder_types[1]))
-                    path_rtss = [x for x in all_folders_dlc_2 if x.endswith('\\RTSTRUCT')]
+                    # 'with_contrast' has highest priority: if it does not contain one or more of the required folders,
+                    # then search in 'no_contrast'
+                    if len(path_rtss) == 0:
+                        all_folders_dlc_2 = get_all_folders(os.path.join(data_dir_dlc, patient_id, patient_folder_types[1]))
+                        path_rtss = [x for x in all_folders_dlc_2 if x.endswith('\\RTSTRUCT')]
 
-                assert len(path_rtss) == 1
-                path_rtss = path_rtss[0]
-                file_rtss = glob(path_rtss + '/*')
-                assert len(file_rtss) == 1
-                file_rtss = file_rtss[0]
-            else:
-                # TODO: temporary, for MDACC
-                path_rtss = [x for x in all_folders_dlc if x.endswith('\\Post processed RTSS')]
-                assert len(path_rtss) == 1
-                path_rtss = path_rtss[0]
+                    assert len(path_rtss) == 1
+                    path_rtss = path_rtss[0]
+                    file_rtss = glob(path_rtss + '/*')
+                    assert len(file_rtss) == 1
+                    file_rtss = file_rtss[0]
+                else:
+                    # TODO: temporary, for MDACC
+                    path_rtss = [x for x in all_folders_dlc if x.endswith('\\Post processed RTSS')]
+                    assert len(path_rtss) == 1
+                    path_rtss = path_rtss[0]
+                    file_rtss = glob(path_rtss + '/*')
+                    assert len(file_rtss) == 1
+                    file_rtss = file_rtss[0]
+
+            except:
+                path_rtss = os.path.join(data_dir_dlc, patient_id)
                 file_rtss = glob(path_rtss + '/*')
                 assert len(file_rtss) == 1
                 file_rtss = file_rtss[0]

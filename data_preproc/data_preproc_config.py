@@ -13,12 +13,12 @@ use_umcg = True
 # TODO: temporary, for MDACC
 if use_umcg:
     data_dir = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/PRI2MA/{}'
-    data_collection_dir = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/Users/Hooman Bahrdo/Data_test'
+    data_collection_dir = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/Users/Hooman Bahrdo/Deep_learning_datasets/Preprocessed_dataset1'
     data_dir_citor = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/PRI2MA/{}'  # Contains all 1453 CITOR RTSTRUCTs
-    save_dir_citor = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/Users/Hooman Bahrdo/Data_testraw_rtstructs_citor'  # Contains CITOR RTSTRUCTs for our patients in our cohort
-    data_dir_dlc = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/PRI2MA/DLC'  # Contains (valid) DLC RTSTRUCTs
-    save_root_dir = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/Users/Hooman Bahrdo/Data_test'  # Contains saved files from scripts such as processed data, loggings, etc.
-    save_root_dir_2 = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/Users/Hooman Bahrdo/Data_test/Second_root'  # Contains saved files for dataset
+    save_dir_citor = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/Users/Hooman Bahrdo/Deep_learning_datasets/Preprocessed_dataset1/raw_rtstructs_citor'  # Contains CITOR RTSTRUCTs for our patients in our cohort
+    data_dir_dlc = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/OPC_data/ART Hooman/Hooman_project_data/DLC_baseline' # Correct DLCs  #'//zkh/appdata/RTDicom/Projectline_HNC_modelling/PRI2MA/DLC'  # Contains (valid) DLC RTSTRUCTs
+    save_root_dir = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/Users/Hooman Bahrdo/Deep_learning_datasets/Preprocessed_dataset1'  # Contains saved files from scripts such as processed data, loggings, etc.
+    save_root_dir_2 = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/Users/Hooman Bahrdo/Deep_learning_datasets/Preprocessed_dataset1/Second_root'  # Contains saved files for dataset
     save_dir = os.path.join(save_root_dir_2, 'dicom_processed')
 else:
     data_dir = '//zkh/appdata/RTDicom/PRI2MA/MDACC/{}'
@@ -146,7 +146,7 @@ filename_segmentation_fraction_outside_ct_csv = 'segmentation_fraction_outside_c
 # data_preproc.py
 filename_data_preproc_array_logging_txt = 'data_preproc_array_logging.txt'
 filename_data_preproc_features_logging_txt = 'data_preproc_features_logging.txt'
-filename_endpoints_csv = 'endpoints.csv'
+filename_endpoints_csv = 'delta_rf_df.csv'
 filename_patient_id_npy = '{patient_id}.npy'  # model's input (Numpy array), concatenation of: CT, RTDOSE and RTSTRUCT
 filename_features_csv = 'features.csv'
 filename_stratified_sampling_csv = 'stratified_sampling.csv'
@@ -302,9 +302,6 @@ ct_colorbar_title = 'HU'
 rtdose_colorbar_title = 'cGy'
 segmentation_colorbar_title = ''
 
-# Run whole data_preproc pipeline for a small number of patients, useful for testing
-test_patients_list = ['0020715', '3573430']  # None  # ['0276627']
-
 #######################################
 ##### WeeklyCt Parameters #####
 # Here, I will add some of the parameters used to preprocess WeeklyCTs
@@ -314,3 +311,6 @@ weeklyct_dir = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/OPC_data/ART Hoo
 weeklyct_folder_name = 'w3CT_reg_bsl' # Name of the folder one saved all the regisered weeklyCTs in.
 filename_weeklyct_metadata_json = 'weeklyct_metadata.json'  # meta-data of the WeeklyCT data
 filename_weeklyct_npy = 'weeklyct.npy'  # WeeklyCT (Numpy array)
+
+# Run whole data_preproc pipeline for a small number of patients, useful for testing
+test_patients_list = os.listdir(weeklyct_dir)  # None  # ['0276627']
