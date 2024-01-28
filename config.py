@@ -29,7 +29,7 @@ import data_preproc.data_preproc_config as data_preproc_config
 from data_preproc.data_preproc_functions import create_folder_if_not_exists
 
 # Whether to perform quick run for checking workability of code or not
-perform_test_run = True # 
+perform_test_run = True # This one is used for testing purposes.
 
 # Set directory contexts
 root_path = os.getcwd()
@@ -80,7 +80,7 @@ perform_stratified_sampling_full = True  # (Stratified Sampling). Whether or not
 strata_groups = ['HN35_Xerostomia_M12_class', 'CT+C_available', 'CT_Artefact', 'Photons', 'Loctum2_v2']  #, 'Year_treatment_2cat']  # (Stratified Sampling). Note: order does not matter.
 split_col = 'Split'  # (Stratified Sampling). Column of the stratified sampling outcome ('train', 'val', 'test').
 cv_strata_groups = strata_groups  # (TODO: implement) Stratified Cross-Validation groups
-cv_folds = 3  # (Cross-Validation) If cv_folds=1, then perform train-val-test-split.
+cv_folds = 3 # (Cross-Validation) If cv_folds=1, then perform train-val-test-split. (For testing, I put it equal to 1)
 cv_type = 'stratified'  # (Stratified CV, only if cv_folds > 1) None | 'stratified'. Stratification is performed on endpoint value.
 dataset_type = 'cache'  # 'standard' | 'cache' | 'persistent'. If None, then 'standard'.
 # Cache: caches data in RAM storage. Persistent: caches data in disk storage instead of RAM storage.
@@ -263,7 +263,7 @@ if perform_test_run:
     n_samples = 40
     nr_runs = 1
     max_epochs = 2
-    train_frac = 0.33
+    train_frac = 0.33 # What???!!!Why???!!!
     val_frac = 0.33
     cv_folds = 1
     batch_size = 2

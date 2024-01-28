@@ -120,7 +120,7 @@ def get_files(sampling_type, features, filename_stratified_sampling_test_csv, fi
     perform_test_run = config.perform_test_run
     train_frac = config.train_frac
     val_frac = config.val_frac
-    strata_groups = config.strata_groups
+    strata_groups = config.strata_groups # Maybe, should consider some changes in this list.
     split_col = config.split_col
 
     # Load list of patients to be excluded
@@ -163,7 +163,7 @@ def get_files(sampling_type, features, filename_stratified_sampling_test_csv, fi
 
     assert len(patient_ids_list) == len(features_list) == len(labels_list)
     # Note: '0' in front of string is okay: int('0123') will become 123
-    data_dicts = [
+    data_dicts = [ # Some changes here chane segmentation map to weeklyCTs
         {'ct': os.path.join(data_dir, str(label_name), patient_id, data_preproc_config.filename_ct_npy),
          'rtdose': os.path.join(data_dir, str(label_name), patient_id, data_preproc_config.filename_rtdose_npy),
          'segmentation_map': os.path.join(data_dir, str(label_name), patient_id,
@@ -190,7 +190,7 @@ def get_files(sampling_type, features, filename_stratified_sampling_test_csv, fi
         val_dict = train_val_dict[n_train:]
         test_dict = [x for x in data_dicts if x['patient_id'] in patients_test]
 
-    elif sampling_type == 'stratified':
+    elif sampling_type == 'stratified': # Most of the time, we are using this option.
         # Stratified sampling
         path_filename = os.path.join(data_dir, filename_stratified_sampling_full_csv)
         if not os.path.isfile(path_filename) or perform_stratified_sampling_full:
@@ -493,7 +493,7 @@ def get_transforms(perform_data_aug, modes_3d, modes_2d, data_aug_p, data_aug_st
         logger:
 
     Returns:
-
+concat_key
     """
     to_device = config.to_device
     image_keys = config.image_keys
@@ -512,7 +512,7 @@ def get_transforms(perform_data_aug, modes_3d, modes_2d, data_aug_p, data_aug_st
 
     logger.my_print('To_device: {}.'.format(to_device))
 
-    # Define generic transforms
+    # Define generic transforms (This transformation is based on new intesities' limitations both for CT and Dose)
     generic_transforms = Compose([
         LoadImaged(keys=image_keys),
         EnsureTyped(keys=image_keys + ['features', 'label'], data_type='tensor'),
@@ -538,7 +538,7 @@ def get_transforms(perform_data_aug, modes_3d, modes_2d, data_aug_p, data_aug_st
     # Define internal validation and test transforms
     val_transforms = generic_transforms
 
-    # Data augmentation
+    # Data augmentation (Here the algorithm performs Augmentation on the train dataset.) 
     if perform_data_aug:
         train_transforms = Compose([
             train_transforms,
@@ -569,7 +569,7 @@ def get_transforms(perform_data_aug, modes_3d, modes_2d, data_aug_p, data_aug_st
             # RandGaussianNoised(keys=['rtdose'], prob=data_aug_p, mean=0.0, std=(0.1 / (range_value_rtdose ** (1 / 2))) * data_aug_strength),
         ])
 
-    # Resize images
+    # Resize images (Based on the input size [96, 96, 96])
     if list(rand_cropping_size) != list(input_size) or not perform_data_aug:
         train_transforms = Compose([
             train_transforms,

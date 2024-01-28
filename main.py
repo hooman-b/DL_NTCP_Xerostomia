@@ -504,25 +504,26 @@ if __name__ == '__main__':
     filename_stratified_sampling_full_csv = config.filename_stratified_sampling_full_csv
     perform_stratified_sampling_full = config.perform_stratified_sampling_full
     sampling_type = config.sampling_type
-    cv_folds = config.cv_folds
-    cv_type = config.cv_type
-    use_sampler = config.use_sampler
-    perform_data_aug = config.perform_data_aug
-    rand_cropping_size = config.rand_cropping_size
+    cv_folds = config.cv_folds # For testing, it will be equal to one
+    cv_type = config.cv_type # it should be put at 'stratified'.
+    use_sampler = config.use_sampler # For uing WeightedRandomSampler (oversampling)
+    perform_data_aug = config.perform_data_aug # True
+    rand_cropping_size = config.rand_cropping_size # This shrinks the number of slide, here from 100 to 96
     input_size = config.input_size
-    resize_mode = config.resize_mode
-    seg_orig_labels = config.seg_orig_labels
-    seg_target_labels = config.seg_target_labels
+    resize_mode = config.resize_mode # 'area', using for upsampling
+    seg_orig_labels = config.seg_orig_labels # The name of the OARs from original form
+    seg_target_labels = config.seg_target_labels # Set the important targets one, some with less important 0.1, and redundant zero.
+
     # Deep Learning model
-    dataloader_drop_last = config.dataloader_drop_last
-    data_aug_p = config.data_aug_p
-    data_aug_strength = config.data_aug_strength
+    dataloader_drop_last = config.dataloader_drop_last # This ignores the last batch
+    data_aug_p = config.data_aug_p # Probability of data augmentation
+    data_aug_strength = config.data_aug_strength # Is set to be 1 and it means they are as powerful as the real data
     perform_augmix = config.perform_augmix
     mixture_depth = config.mixture_depth
     mixture_width = config.mixture_width
     augmix_strength = config.augmix_strength
-    model_name = config.model_name
-    features_dl = config.features_dl
+    model_name = config.model_name # First model 'dcnn_lrelu', but it was changed here in the main program.
+    features_dl = config.features_dl # This should be changed based on .csv file
     resnet_shortcut = config.resnet_shortcut
     filters = config.filters
     kernel_sizes = config.kernel_sizes
@@ -532,50 +533,51 @@ if __name__ == '__main__':
     pooling_conv_filters = config.pooling_conv_filters
     perform_pooling = config.perform_pooling
     linear_units = config.linear_units
-    clinical_variables_position = config.clinical_variables_position
+    clinical_variables_position = config.clinical_variables_position # This adds the important clinical variables to the model
     clinical_variables_linear_units = config.clinical_variables_linear_units
     clinical_variables_dropout_p = config.clinical_variables_dropout_p
     dropout_p = config.dropout_p
     use_bias = config.use_bias
-    num_classes = config.num_classes
+    num_classes = config.num_classes # Maybe this one is the number of different categories in the label column
     num_ohe_classes = config.num_ohe_classes
-    pretrained_path = config.pretrained_path
-    weight_init_name = config.weight_init_name
+    pretrained_path = config.pretrained_path # This one is a path to pretrained model, maybe is used for transferring networks.
+    weight_init_name = config.weight_init_name # The following four parameters are about weight initializer. 
     kaiming_a = config.kaiming_a
     kaiming_mode = config.kaiming_mode
     kaiming_nonlinearity = config.kaiming_nonlinearity
     gain = config.gain
-    optimizer_name = config.optimizer_name
+    optimizer_name = config.optimizer_name # This one is about the optimizer
     optimizer_name_next = config.optimizer_name_next
     loss_function_name = config.loss_function_name
-    manual_lr = config.manual_lr
+    manual_lr = config.manual_lr # Learning rate properties
     base_lr = config.lr
-    momentum = config.momentum
-    weight_decay = config.weight_decay
-    hessian_power = config.hessian_power
-    use_lookahead = config.use_lookahead
+    momentum = config.momentum # Optimizer properties
+    weight_decay = config.weight_decay  # L2 regularization penalty
+    hessian_power = config.hessian_power # Hessian Optimizer property
+    use_lookahead = config.use_lookahead # Another Optimizer method
     lookahead_k = config.lookahead_k
     lookahead_alpha = config.lookahead_alpha
     lr_finder_num_iter = config.lr_finder_num_iter
-    scheduler_name = config.scheduler_name
+    scheduler_name = config.scheduler_name # Learning rate scheduker, here is Cosine
     warmup_batches = config.warmup_batches
-    T_0 = config.T_0
-    T_mult = config.T_mult
-    eta_min = config.eta_min
-    step_size_up = config.step_size_up
-    gamma = config.gamma
-    step_size = config.step_size
-    grad_max_norm = config.grad_max_norm
-    label_weights = config.label_weights
-    label_smoothing = config.label_smoothing
-    loss_weights = config.loss_weights
-    nr_of_decimals = config.nr_of_decimals
+    T_0 = config.T_0 # Number of epoches befor restarting
+    T_mult = config.T_mult # A factor increases after a restart
+    eta_min = config.eta_min # Minimum learning rate
+    step_size_up = config.step_size_up # number of itteration in each cycle
+    gamma = config.gamma # Learning rate factor for each epoch
+    step_size = config.step_size # Learning rate factor for each epoch
+    grad_max_norm = config.grad_max_norm # (None), no grad clipping
+    label_weights = config.label_weights # Weight of the classes
+    label_smoothing = config.label_smoothing # (0) no label smoothing
+    loss_weights = config.loss_weights # Weights of the different loss functions
+    nr_of_decimals = config.nr_of_decimals # Number of decimals
     # max_epochs = config.max_epochs
-    batch_size = config.batch_size
+    batch_size = config.batch_size # Some parameters of Training config
     max_batch_size = config.max_batch_size
     patience_lr = config.patience_lr
     patience_opt = config.patience_opt
-    patience = config.patience
+    patience = config.patience # Limit the number of running epoches
+
     # Logistic regression model
     patient_id_col = data_preproc_config.patient_id_col
     features_lr = data_preproc_config.features
@@ -583,18 +585,18 @@ if __name__ == '__main__':
     patient_id_length = data_preproc_config.patient_id_length
 
     # Initialize classes
-    sigmoid_act = torch.nn.Sigmoid()
+    sigmoid_act = torch.nn.Sigmoid() # Is the activation function here
     softmax_act = Activations(softmax=True)
-    to_onehot = AsDiscrete(to_onehot=num_ohe_classes)
-    mse_metric = MSEMetric()
-    auc_metric = ROCAUCMetric()
+    to_onehot = AsDiscrete(to_onehot=num_ohe_classes) # Determine the descrete classes
+    mse_metric = MSEMetric() # mean squared error
+    auc_metric = ROCAUCMetric() # AUC-ROC
 
     # Set seed for reproducibility
     torch.manual_seed(seed=seed)
     set_determinism(seed=seed)
     random.seed(a=seed)
     np.random.seed(seed=seed)
-    torch.backends.cudnn.benchmark = cudnn_benchmark
+    torch.backends.cudnn.benchmark = cudnn_benchmark # For now, it is equal to False, but it may change to True in the future.
 
     # Initialize W&B
     # run = wandb.init(project='DL_NTCP', reinit=True, mode=wandb_mode)
@@ -631,7 +633,7 @@ if __name__ == '__main__':
         logger.my_print('Fold: {}'.format(fold))
         logger.my_print('Seed: {}'.format(seed))
         test_loss_value, test_mse_value, test_auc_value, test_auc_mean, test_auc_lr, test_auc_lr_mean = [None] * 6
-        if pretrained_path is not None:
+        if pretrained_path is not None: # It means that if you have a pretrained model.
             pretrained_path_i = os.path.join(pretrained_path, str(fold), config.filename_best_model_pth)
         else:
             pretrained_path_i = None
@@ -640,8 +642,9 @@ if __name__ == '__main__':
         # Cross-Validation
         if cv_folds > 1:
             if fold == 0:
-                # Fetch training, internal validation and test files
-                cv_dict_0, cv_dict_1, test_dict = load_data.get_files(
+                # Fetch training, internal validation and test files (get the mentioned files)
+                # Basically, it makes the train,val, and test files. Also, it is used for adding perform_test_run
+                cv_dict_0, cv_dict_1, test_dict = load_data.get_files(  
                     sampling_type=sampling_type, features=features_dl,
                     filename_stratified_sampling_test_csv=filename_stratified_sampling_test_csv,
                     filename_stratified_sampling_full_csv=filename_stratified_sampling_full_csv,

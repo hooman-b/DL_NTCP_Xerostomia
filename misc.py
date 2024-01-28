@@ -465,7 +465,7 @@ def get_model(model_name, num_ohe_classes, channels, depth, height, width, n_fea
     else:
         raise ValueError('Invalid model_name: {}.'.format(model_name))
 
-    # Load pretrained model weights
+    # Load pretrained model weights (Basically this adds a pre-model)
     if pretrained_path is not None:
         checkpoint = torch.load(pretrained_path)
 
