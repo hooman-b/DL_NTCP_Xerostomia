@@ -170,13 +170,13 @@ patient_id_col =  'ID' #'PatientID'
 endpoint = 'xer_06' #'HN35_Xerostomia_M12_class'
 baseline_col = 'xer_bsl' #'HN35_Xerostomia_W01_class'
 
-submodels_features =  [['xer_bsl', 'Parotid_Dmean', 'dlc_delta_surf']] # I do NOT have any submodel in my base model.
+submodels_features =  None#[['xer_bsl', 'Parotid_Dmean']] # I do NOT have any submodel in my base model.
     #[
     #['Submandibular_meandose', 'HN35_Xerostomia_W01_little', 'HN35_Xerostomia_W01_moderate_to_severe'],
     #['Parotid_meandose_adj', 'HN35_Xerostomia_W01_little', 'HN35_Xerostomia_W01_moderate_to_severe'],
 #]  # Features of submodels. Should be a list of lists. len(submodels_features) = nr_of_submodels. If None, then
 # no fitting of submodels.
-features =  ['xer_bsl', 'Parotid_Dmean', 'dlc_delta_surf'] #['Submandibular_meandose', 'Parotid_meandose_adj', 'HN35_Xerostomia_W01_little',
+features =  ['xer_bsl', 'Parotid_Dmean'] #['Submandibular_meandose', 'Parotid_meandose_adj', 'HN35_Xerostomia_W01_little',
             #'HN35_Xerostomia_W01_moderate_to_severe']  # Features of final model. Elements in submodels_features should
 # be a subset of `features`, i.e. submodels_features can have more distinct features than the final model.
 lr_coefficients = None  # [-2.9032, 0.0193, 0.1054, 0.5234, 1.2763]  # Values starting with coefficient for `intercept`,

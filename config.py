@@ -32,7 +32,8 @@ from data_preproc.data_preproc_functions import create_folder_if_not_exists
 perform_test_run = True # This one is used for testing purposes.
 
 # Set directory contexts
-root_path = os.getcwd()
+root_path = os.getcwd()#'//zkh/appdata/RTDicom/Projectline_HNC_modelling/Users/Hooman Bahrdo/Deep_learning_datasets/Preprocessed_dataset1' #os.getcwd()
+
 models_dir = os.path.join(root_path, 'models')
 optimizers_dir = os.path.join(root_path, 'optimizers')
 data_preproc_dir = os.path.join(root_path, 'data_preproc')
@@ -47,7 +48,7 @@ exp_models_dir = os.path.join(exp_src_dir, 'models')
 exp_optimizers_dir = os.path.join(exp_src_dir, 'optimizers')
 exp_data_preproc_dir = os.path.join(exp_src_dir, 'data_preproc')
 exp_figures_dir = os.path.join(exp_dir, 'figures')
-filename_stratified_sampling_test_csv = 'stratified_sampling_test_manual_94.csv'  # input file
+filename_stratified_sampling_test_csv = 'stratified_sampling_test_manual_94.csv'  # input file # Ask tomorrow
 filename_stratified_sampling_full_csv = 'stratified_sampling_full_manual_94.csv'  # output file
 filename_train_val_test_patient_ids_json = 'train_val_test_patient_ids.json'
 filename_results_csv = 'results.csv'
@@ -162,8 +163,8 @@ model_name = 'dcnn_lrelu'  # ['cnn_lrelu', 'convnext_tiny', 'convnext_small', 'c
 # 'resnet_dcnn_dws_lrelu_v2, 'resnet_dcnn_lrelu_gn',
 # 'resnet_dcnn_selu', 'resnet_mp_lrelu', 'resnet_original_relu', 'resnext_lrelu', 'resnext_original_relu'].
 n_input_channels = 3  # CT, RTDOSE and Segmentation_map
-features_dl = ['HN35_Xerostomia_W01_not_at_all', 'HN35_Xerostomia_W01_little', 'HN35_Xerostomia_W01_moderate_to_severe',
-               'Gender', 'Age']  # [] | data_preproc_config.features  # Should contain columns in features.csv.
+features_dl = ['xer_bsl', 'Parotid_Dmean']#['HN35_Xerostomia_W01_not_at_all', 'HN35_Xerostomia_W01_little', 'HN35_Xerostomia_W01_moderate_to_severe',
+              # 'Gender', 'Age']  # [] | data_preproc_config.features  # Should contain columns in features.csv.
 resnet_shortcut = 'B'  # (resnet_original) 'A', 'B'. Pretrained resnet10_original has 'B', resnet18_original has 'A'.
 filters = [8, 8, 16, 16, 32]
 kernel_sizes = [7, 5, 4, 3, 3]
@@ -263,8 +264,8 @@ if perform_test_run:
     n_samples = 40
     nr_runs = 1
     max_epochs = 2
-    train_frac = 0.33 # What???!!!Why???!!!
-    val_frac = 0.33
+    train_frac = 0.6# What???!!!Why???!!!
+    val_frac = 0.2
     cv_folds = 1
     batch_size = 2
     num_workers = 0
