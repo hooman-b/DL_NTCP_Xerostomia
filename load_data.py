@@ -246,7 +246,10 @@ def get_files(sampling_type, features, filename_stratified_sampling_test_csv, fi
                 test_dict.append(d_dict)
             else:
                 raise ValueError('Invalid split_i: {}.'.format(split_i))
-
+        print('len total', len(df_features))
+        print('len second', len(data_dicts) + len(exclude_patients))
+        print('len third',len(df_split) + len(exclude_patients))
+        print('len forth',len(train_dict) + len(val_dict) + len(test_dict) + len(exclude_patients))
         assert len(df_features) == len(data_dicts) + len(exclude_patients) == len(df_split) + len(exclude_patients) == \
                len(train_dict) + len(val_dict) + len(test_dict) + len(exclude_patients)
 

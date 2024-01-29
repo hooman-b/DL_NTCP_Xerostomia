@@ -313,4 +313,4 @@ filename_weeklyct_metadata_json = 'weeklyct_metadata.json'  # meta-data of the W
 filename_weeklyct_npy = 'weeklyct.npy'  # WeeklyCT (Numpy array)
 
 # Run whole data_preproc pipeline for a small number of patients, useful for testing
-test_patients_list = os.listdir(weeklyct_dir)  # None  # ['0276627']
+test_patients_list = os.listdir(weeklyct_dir)  # None  # ['0276627'] ['0021879', '0052277']#
