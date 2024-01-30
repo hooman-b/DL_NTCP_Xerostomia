@@ -118,7 +118,7 @@ rtdose_a_max = 8000
 rtdose_b_min = 0.0
 rtdose_b_max = 1.0
 rtdose_clip = True
-# Segmentation_map
+# Segmentation_map  ####### Some changes here ########
 # segmentation_map_a_min = 0.0
 # segmentation_map_a_max = 1.0
 # segmentation_map_b_min = 0.0
@@ -154,7 +154,7 @@ mixture_depth = [1, 3]  # [1, 3] (default)
 augmix_strength = 3
 
 # Deep Learning model config
-model_name = 'dcnn_lrelu'  # ['cnn_lrelu', 'convnext_tiny', 'convnext_small', 'convnext_base',
+model_name = 'resnet_lrelu'  # ['cnn_lrelu', 'convnext_tiny', 'convnext_small', 'convnext_base',
 # 'dcnn_lrelu', 'dcnn_dws_lrelu', 'dcnn_lrelu_gn', 'dcnn_lrelu_ln', 'dcnn_selu', 'efficientnet-b0', 'efficientnet-b1',
 # ..., 'efficientnet-b8', 'efficientnetv2_xs', 'efficientnetv2_s', 'efficientnetv2_m', 'efficientnetv2_l',
 # 'efficientnetv2_xl', 'efficientnetv2_s_selu', 'efficientnetv2_m_selu', 'efficientnetv2_l_selu',
@@ -165,7 +165,7 @@ n_input_channels = 3  # CT, RTDOSE and Segmentation_map
 features_dl = ['xer_bsl', 'Parotid_Dmean']#['HN35_Xerostomia_W01_not_at_all', 'HN35_Xerostomia_W01_little', 'HN35_Xerostomia_W01_moderate_to_severe',
               # 'Gender', 'Age']  # [] | data_preproc_config.features  # Should contain columns in features.csv.
 resnet_shortcut = 'B'  # (resnet_original) 'A', 'B'. Pretrained resnet10_original has 'B', resnet18_original has 'A'.
-filters = [8, 8, 16, 16, 32]
+filters = [8, 8, 16, 16, 32]#[6, 12, 24, 48, 96]#
 kernel_sizes = [7, 5, 4, 3, 3]
 strides = [[2]*3, [2]*3, [2]*3, [2]*3, [2]*3]  # strides>2 currently not supported.
 # Usually len(kernel_sizes) == len(filters), but len(kernel_sizes) > len(filters) is often allowed, but then
@@ -208,7 +208,7 @@ hessian_power = 1.0  # (AdaHessian)
 use_lookahead = False  # (Lookahead)
 lookahead_k = 5  # (Lookahead) 5 (default), 10.
 lookahead_alpha = 0.5  # (Lookahead) 0.5 (default), 0.8.
-loss_function_name = 'custom'  # [None, 'bce' (num_classes = 1), 'cross_entropy' (num_classes = 2), 'cross_entropy',
+loss_function_name = 'cross_entropy'  # [None, 'bce' (num_classes = 1), 'cross_entropy' (num_classes = 2), 'cross_entropy', # Ask for costume
 # 'dice', 'f1', 'ranking', 'soft_auc', 'custom']. Note: if 'bce', then also change label_weights to list of 1 element.
 # Note: model output should be logits, i.e. NO sigmoid() (BCE) nor softmax() (CE) applied.
 loss_weights = [1, 0, 1, 1, 0, 0]  # [1/6, 1/6, 1/6, 1/6, 1/6, 1/6].
@@ -266,7 +266,7 @@ if perform_test_run:
     train_frac = 0.6 # What???!!!Why???!!!
     val_frac = 0.2
     cv_folds = 1
-    batch_size = 2
+    batch_size = 3
     num_workers = 0
     pin_memory = False
     plot_interval = 1

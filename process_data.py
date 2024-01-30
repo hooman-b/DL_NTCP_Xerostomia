@@ -43,6 +43,8 @@ def preprocess_inputs(inputs, ct_mean, ct_std, rtdose_mean, rtdose_std):
     rtdose_scaler = ScaleIntensityRange(a_min=config.rtdose_a_min, a_max=config.rtdose_a_max,
                                         b_min=config.rtdose_b_min, b_max=config.rtdose_b_max,
                                         clip=config.rtdose_clip)
+    
+    # ####### Some changes here ########
     # ScaleIntensityRange(keys=['segmentation_map'],
     #                     a_min=config.segmentation_map_a_min, a_max=config.segmentation_map_a_max,
     #                     b_min=config.segmentation_map_b_min, b_max=config.segmentation_map_b_max,

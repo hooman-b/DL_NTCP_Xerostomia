@@ -343,14 +343,17 @@ def train(model, train_dataloader, val_dataloader, test_dataloader, mean, std, o
             val_mse_values_list.append(val_mse_value)
             val_auc_values_list.append(val_auc_value)
 
-            # Perform independent testing
-            test_loss_value, test_mse_value, test_auc_value = validate(model=model, dataloader=test_dataloader,
-                                                                       mean=mean, std=std,
-                                                                       mode='independent testing', logger=logger,
-                                                                       save_outputs=True)
-            test_loss_values_list.append(test_loss_value)
-            test_mse_values_list.append(test_mse_value)
-            test_auc_values_list.append(test_auc_value)
+            # # Perform independent testing (Redundant)
+            # test_loss_value, test_mse_value, test_auc_value = validate(model=model, dataloader=test_dataloader,
+            #                                                            mean=mean, std=std,
+            #                                                            mode='independent testing', logger=logger,
+            #                                                            save_outputs=True)
+            # test_loss_values_list.append(test_loss_value)
+            # test_mse_values_list.append(test_mse_value)
+            # test_auc_values_list.append(test_auc_value)
+            test_loss_values_list = []
+            test_mse_values_list = []
+            test_auc_values_list = []
 
             # Select model
             if val_auc_value > best_val_auc_value:

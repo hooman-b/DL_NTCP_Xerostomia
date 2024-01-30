@@ -148,7 +148,7 @@ filename_data_preproc_array_logging_txt = 'data_preproc_array_logging.txt'
 filename_data_preproc_features_logging_txt = 'data_preproc_features_logging.txt'
 filename_endpoints_csv = 'delta_rf_df.csv'
 filename_patient_id_npy = '{patient_id}.npy'  # model's input (Numpy array), concatenation of: CT, RTDOSE and RTSTRUCT
-filename_features_csv = 'features.csv'
+filename_features_csv = 'delta_rf_df.csv'
 filename_stratified_sampling_csv = 'stratified_sampling.csv'
 # segmentation arrays
 filename_overview_structures_count_csv = 'overview_structures_count.csv'
@@ -307,7 +307,7 @@ segmentation_colorbar_title = ''
 # Here, I will add some of the parameters used to preprocess WeeklyCTs
 # dicom_processed
 save_dir_weeklyct = save_dir # path to store the raw weeklyCTs images.
-weeklyct_dir = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/OPC_data/ART Hooman/Hooman_project_data/Registered_WeeklyCTs'
+weeklyct_dir = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/OPC_data/ART Hooman/Hooman_project_data/Registered_Week3'
 weeklyct_folder_name = 'w3CT_reg_bsl' # Name of the folder one saved all the regisered weeklyCTs in.
 filename_weeklyct_metadata_json = 'weeklyct_metadata.json'  # meta-data of the WeeklyCT data
 filename_weeklyct_npy = 'weeklyct.npy'  # WeeklyCT (Numpy array)
