@@ -272,3 +272,7 @@ if perform_test_run:
     plot_interval = 1
     max_nr_images_per_interval = 5
 
+
+# Add optuna initializing variables
+optuna_path_pickles = os.path.join(root_path, 'optuna_pickles') # Ask about thiese two
+optuna_path_figures = os.path.join(root_path, 'optuna_figures')

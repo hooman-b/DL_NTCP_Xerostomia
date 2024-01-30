@@ -1,6 +1,8 @@
 """
 Script for developing deep learning models via cross-validation, ensembling the models (mean prediction), and
 independently testing the final ensemble model.
+
+TODO: Add loop to evaluate different loss function, optimizers and models.
 """
 import os
 import time
@@ -54,7 +56,10 @@ def initialize(torch_version, device, create_folders=True):
         exp_optimizers_dir = config.exp_optimizers_dir
         exp_data_preproc_dir = config.exp_data_preproc_dir
         exp_figures_dir = config.exp_figures_dir
-        for p in [exp_dir, exp_src_dir, exp_models_dir, exp_optimizers_dir, exp_data_preproc_dir, exp_figures_dir]:
+        optuna_path_pickles = config.optuna_path_pickles
+        optuna_path_figures = config.optuna_path_figures
+
+        for p in [exp_dir, exp_src_dir, exp_models_dir, exp_optimizers_dir, exp_data_preproc_dir, exp_figures_dir, optuna_path_pickles, optuna_path_figures]:
             create_folder_if_not_exists(p)
 
         # Fetch folders and files that should be copied to exp folder
@@ -89,7 +94,11 @@ def initialize(torch_version, device, create_folders=True):
     return logger
 
 
-def validate(model, dataloader, mean, std, mode, logger, save_outputs=True):
+def validate(model, dataloader, mean, std, mode,
+             loss_function, loss_function_name, sigmoid_act, softmax_act, auc_metric, mse_metric,
+             to_onehot, num_classes, model_name, exp_dir,
+             device,
+             logger, save_outputs=True):
     """
     Validate the model.
 
@@ -254,7 +263,7 @@ def train(model, train_dataloader, val_dataloader, test_dataloader, mean, std, o
                                                            device=device, seed=seed_b)
 
             # Preprocess inputs and features
-            # NOTE: these operations should also be performed in lr_finder.py
+            # NOTE: these operations should also be performed in lr_finder.py ##### Maybe some changes here, for my model. #####
             train_inputs = process_data.preprocess_inputs(inputs=train_inputs, ct_mean=mean[0], ct_std=std[0],
                                                           rtdose_mean=mean[1], rtdose_std=std[1])
             train_features = process_data.preprocess_features(features=train_features)
@@ -334,11 +343,17 @@ def train(model, train_dataloader, val_dataloader, test_dataloader, mean, std, o
         train_auc_values_list.append(train_auc_value)
 
         if (epoch + 1) % config.eval_interval == 0:
-            # Perform internal validation
+            # Perform internal validation  
             val_loss_value, val_mse_value, val_auc_value = validate(model=model, dataloader=val_dataloader,
                                                                     mean=mean, std=std,
-                                                                    mode='internal validation', logger=logger,
+                                                                    mode='internal validation', 
+                                                                    loss_function=loss_function, loss_function_name=loss_function_name,
+                                                                    sigmoid_act=sigmoid_act, softmax_act=softmax_act, auc_metric=auc_metric, mse_metric=mse_metric,
+                                                                    to_onehot=to_onehot, num_classes=num_classes, model_name=model_name, exp_dir=exp_dir,
+                                                                    device=device,
+                                                                    logger=logger,
                                                                     save_outputs=True)
+            val_loss_values_list.append(val_loss_value)
             val_loss_values_list.append(val_loss_value)
             val_mse_values_list.append(val_mse_value)
             val_auc_values_list.append(val_auc_value)
@@ -434,14 +449,14 @@ def train(model, train_dataloader, val_dataloader, test_dataloader, mean, std, o
             if scheduler_name == 'lr_finder':
                 for param_group in optimizer.param_groups:
                     last_lr = param_group['lr']
-                new_lr, optimizer = misc.learning_rate_finder(model=model, train_dataloader=train_dl,
-                                                              val_dataloader=val_dl, optimizer=optimizer,
+                new_lr, optimizer = misc.learning_rate_finder(model=model, train_dataloader=train_dataloader,
+                                                              val_dataloader=val_dataloader, optimizer=optimizer,
                                                               loss_function=loss_function, data_aug_p=data_aug_p,
                                                               data_aug_strength=data_aug_strength,
                                                               perform_augmix=perform_augmix,
                                                               mixture_width=mixture_width, mixture_depth=mixture_depth,
                                                               augmix_strength=augmix_strength,
-                                                              mean=norm_mean_dict[fold], std=norm_std_dict[fold],
+                                                              mean=mean, std=std,
                                                               grad_max_norm=grad_max_norm, device=device, logger=logger)
                 if new_lr is None:
                     # Use adjusted version of old but valid lr
@@ -834,12 +849,22 @@ if __name__ == '__main__':
 
             # Store predictions on training and validation set
             # IMPORTANT NOTE: train_dl still performs data augmentation!
-            train_loss_value, train_mse_value, train_auc_value, train_patient_ids, train_y_pred_list, train_y_list = \
-                validate(model=model, dataloader=train_dl, mean=norm_mean_dict[fold], std=norm_std_dict[fold],
-                         mode='test', logger=logger, save_outputs=False)
+            train_loss_value, train_mse_value, train_auc_value, train_patient_ids, train_y_pred_list, train_y_list = validate(
+                        model=model, dataloader=train_dl, mean=norm_mean_dict[fold], std=norm_std_dict[fold],
+                        mode='test', 
+                        loss_function=loss_function, loss_function_name=loss_function_name,
+                        sigmoid_act=sigmoid_act, softmax_act=softmax_act, auc_metric=auc_metric, mse_metric=mse_metric,
+                        to_onehot=to_onehot, num_classes=num_classes, model_name=model_name, exp_dir=exp_dir, device=device,
+                        logger=logger, save_outputs=False)
+
             val_loss_value, val_mse_value, val_auc_value, val_patient_ids, val_y_pred_list, val_y_list = validate(
-                model=model, dataloader=val_dl, mean=norm_mean_dict[fold], std=norm_std_dict[fold], mode='test',
-                logger=logger, save_outputs=False)
+                    model=model, dataloader=val_dl, mean=norm_mean_dict[fold], std=norm_std_dict[fold],
+                    loss_function=loss_function, loss_function_name=loss_function_name,
+                    sigmoid_act=sigmoid_act, softmax_act=softmax_act, auc_metric=auc_metric, mse_metric=mse_metric,
+                    to_onehot=to_onehot, num_classes=num_classes, model_name=model_name, exp_dir=exp_dir,
+                    device=device,
+                    mode='test', logger=logger, save_outputs=False)
+
             all_patient_ids = train_patient_ids + val_patient_ids
             all_y_pred_list = train_y_pred_list + val_y_pred_list
             all_y_list = train_y_list + val_y_list
@@ -850,9 +875,15 @@ if __name__ == '__main__':
 
             # Test evaluate model
             if test_dl is not None:
-                test_loss_value, test_mse_value, test_auc_value, test_patient_ids, test_y_pred_list, test_y_list = \
-                    validate(model=model, dataloader=test_dl, mean=norm_mean_dict[fold], std=norm_std_dict[fold],
-                             mode='test', logger=logger, save_outputs=True)
+                test_loss_value, test_mse_value, test_auc_value, test_patient_ids, test_y_pred_list, test_y_list = validate(
+                    model=model, dataloader=test_dl, mean=norm_mean_dict[fold], std=norm_std_dict[fold],
+                    mode='test', logger=logger,
+                    loss_function=loss_function, loss_function_name=loss_function_name,
+                    sigmoid_act=sigmoid_act, softmax_act=softmax_act, auc_metric=auc_metric, mse_metric=mse_metric,
+                    to_onehot=to_onehot, num_classes=num_classes, model_name=model_name, exp_dir=exp_dir,
+                    device=device,
+                    save_outputs=True
+                    )
 
                 # Store predictions on test set
                 all_patient_ids += test_patient_ids
