@@ -187,7 +187,16 @@ def validate(model, dataloader, mean, std, mode,
 
 
 def train(model, train_dataloader, val_dataloader, test_dataloader, mean, std, optimizer, optimizer_name_next,
-          dl_class, train_dl_args_dict, logger):
+          dl_class, train_dl_args_dict,
+		  num_classes,
+          max_epochs, perform_augmix, mixture_width, mixture_depth, augmix_strength, optimizer_name,
+          grad_max_norm, scheduler_name, scheduler, loss_function_name, sigmoid_act, softmax_act, to_onehot,
+          patience, patience_lr, patience_opt, loss_function, auc_metric, mse_metric, data_aug_p, data_aug_strength,
+          max_batch_size, manual_lr,
+          momentum, weight_decay, hessian_power, num_batches_per_epoch, use_lookahead, lookahead_k, lookahead_alpha,
+          device,
+		  model_name, exp_dir, 
+          logger):
     """
     Train the model on the combined dataset, generate images, and save the images and the models.
 
@@ -611,6 +620,7 @@ if __name__ == '__main__':
     to_onehot = AsDiscrete(to_onehot=num_ohe_classes) # Determine the descrete classes
     mse_metric = MSEMetric() # mean squared error
     auc_metric = ROCAUCMetric() # AUC-ROC
+    excl = ''
 
     # Set seed for reproducibility
     torch.manual_seed(seed=seed)
@@ -618,7 +628,6 @@ if __name__ == '__main__':
     random.seed(a=seed)
     np.random.seed(seed=seed)
     torch.backends.cudnn.benchmark = cudnn_benchmark # For now, it is equal to False, but it may change to True in the future.
-    excel = ''
 
     # Optuna
     optuna_batch_size_list = config.optuna_batch_size_list
@@ -746,20 +755,8 @@ if __name__ == '__main__':
     # use_bias = trial.suggest_categorical('use_bias', [True, False])
 
 
-
     # Initialize W&B
     # run = wandb.init(project='DL_NTCP', reinit=True, mode=wandb_mode)
-
-    model_name = 'resnet_lrelu'
-    filters = [2, 3, 4, 5]
-    # clinical_variables_linear_units = [10]
-    # for clinical_variables_position in [-1, 0, 1]:
-    #     for linear_units in [[], [2], [2, 2]]:
-    #         for clinical_variables_linear_units in [None, [10]]:
-    #             dropout_p = [0.2] * len(linear_units)
-    loss_weights = np.random.random(6).tolist()
-    print('loss_weights:', loss_weights)
-
     # Initialize data objects
     train_auc_list, train_auc_lr_list = list(), list()
     val_auc_list, val_auc_lr_list = list(), list()
@@ -776,6 +773,8 @@ if __name__ == '__main__':
         dataloader_drop_last = True
 
     for fold in range(cv_folds):
+        globals()['ijk'] += 1
+        
         # Initialize variables
         logger = initialize(torch_version=torch_version, device=device)
         logger.my_print('Model name: {}'.format(model_name))
@@ -870,6 +869,9 @@ if __name__ == '__main__':
                                use_bias=use_bias, pretrained_path=pretrained_path_i, logger=logger)
         model.to(device=device)
 
+        # Compile model (PyTorch 2)
+        if torch_version.startswith('2.'):
+            model = torch.compile(model)
 
         # Weight initialization
         if 'selu' in model_name:
@@ -880,18 +882,25 @@ if __name__ == '__main__':
             kaiming_nonlinearity = 'linear'
 
         logger.my_print('Weight init name: {}.'.format(weight_init_name))
+
         if pretrained_path_i is not None:
             logger.my_print('Using pretrained weights: {}.'.format(pretrained_path_i))
+
         elif ((pretrained_path_i is None) and
               (weight_init_name is not None) and
               ('efficientnet' not in model_name) and
               ('convnext' not in model_name) and
               ('resnext' not in model_name)):
+
             # Source: https://pytorch.org/docs/stable/generated/torch.nn.Module.html
-            model.apply(lambda m: misc.weights_init(m=m, weight_init_name=weight_init_name, kaiming_a=kaiming_a,
+            model.apply(lambda m: misc.weights_init(m=m,
+                                                    weight_init_name=weight_init_name, 
+                                                    kaiming_a=kaiming_a,
                                                     kaiming_mode=kaiming_mode,
-                                                    kaiming_nonlinearity=kaiming_nonlinearity, gain=gain,
+                                                    kaiming_nonlinearity=kaiming_nonlinearity, 
+                                                    gain=gain,
                                                     logger=logger))
+
             logger.my_print('Using our own weights init scheme for {}.'.format(model_name))
         else:
             logger.my_print('Using default PyTorch weights init scheme for {}.'.format(model_name))
@@ -902,13 +911,17 @@ if __name__ == '__main__':
         # we just use `1` in the input of summary().
         # Important note: torchinfo.summary() somehow uses some random() on input_size, because it will create
         # random input. I.e. input_size changes the next random values.
-        total_params = misc.get_model_summary(model=model, input_size=[(batch_size, channels, depth, height, width),
-                                                                       (batch_size, max(n_features, 1))], device=device,
+        total_params = misc.get_model_summary(model=model, 
+                                              input_size=[(batch_size, channels, depth, height, width),
+                                                                       (batch_size, max(n_features, 1))],
+                                              device=device,
                                               logger=logger)
 
         # Initialize loss function
-        loss_function = misc.get_loss_function(loss_function_name=loss_function_name, label_weights=label_weights,
-                                               label_smoothing=label_smoothing, loss_weights=loss_weights,
+        loss_function = misc.get_loss_function(loss_function_name=loss_function_name, 
+                                               label_weights=label_weights,
+                                               label_smoothing=label_smoothing, 
+                                               loss_weights=loss_weights,
                                                device=device)
 
         # Compile model (PyTorch 2) #########################
@@ -922,8 +935,10 @@ if __name__ == '__main__':
         if scheduler_name == 'manual_lr':
             lr = manual_lr[0]
             manual_lr.pop(0)
+
         else:
             lr = base_lr
+
         optimizer = misc.get_optimizer(optimizer_name=optimizer_name, model=model, lr=lr, momentum=momentum,
                                        weight_decay=weight_decay, hessian_power=hessian_power,
                                        num_batches_per_epoch=num_batches_per_epoch, use_lookahead=use_lookahead,
@@ -960,9 +975,21 @@ if __name__ == '__main__':
         (train_loss_values, val_loss_values, test_loss_values, train_mse_values, val_mse_values, test_mse_values,
          train_auc_values, val_auc_values, test_auc_values, lr_values, batch_size_values, epochs, best_epoch) = \
             train(model=model, train_dataloader=train_dl, val_dataloader=val_dl, test_dataloader=test_dl,
-                  mean=norm_mean_dict[fold], std=norm_std_dict[fold], optimizer=optimizer,
-                  optimizer_name_next=optimizer_name_next, dl_class=dl_class, train_dl_args_dict=train_dl_args_dict,
-                  logger=logger)
+                      mean=norm_mean_dict[fold], std=norm_std_dict[fold],
+                      optimizer=optimizer, optimizer_name_next=optimizer_name_next,
+                      dl_class=dl_class, train_dl_args_dict=train_dl_args_dict, num_classes=num_classes,
+                      max_epochs=max_epochs, perform_augmix=perform_augmix, mixture_width=mixture_width,
+                      mixture_depth=mixture_depth, augmix_strength=augmix_strength, optimizer_name=optimizer_name,
+                      grad_max_norm=grad_max_norm, scheduler_name=scheduler_name, scheduler=scheduler,
+                      loss_function_name=loss_function_name, sigmoid_act=sigmoid_act, softmax_act=softmax_act,
+                      to_onehot=to_onehot, patience=patience, patience_lr=patience_lr, patience_opt=patience_opt,
+                      loss_function=loss_function, auc_metric=auc_metric, mse_metric=mse_metric,
+                      data_aug_p=data_aug_p, data_aug_strength=data_aug_strength, max_batch_size=max_batch_size,
+                      manual_lr=manual_lr, momentum=momentum, weight_decay=weight_decay, hessian_power=hessian_power,
+                      num_batches_per_epoch=num_batches_per_epoch, use_lookahead=use_lookahead,
+                      lookahead_k=lookahead_k, lookahead_alpha=lookahead_alpha, device=device,
+					  model_name=model_name, exp_dir=exp_dir,
+                      logger=logger)
 
         if max_epochs > 0:
             # Plot training and internal validation losses
@@ -1037,6 +1064,7 @@ if __name__ == '__main__':
         # Run logistic regression (LR) model (reference model)
         features_csv = os.path.join(config.data_dir, data_preproc_config.filename_features_csv)
         patient_ids_json = os.path.join(exp_dir, config.filename_train_val_test_patient_ids_json.format(fold))
+
         (train_patient_ids_lr, train_y_pred_lr, train_y_lr, val_patient_ids_lr, val_y_pred_lr, val_y_lr,
          test_patient_ids_lr, test_y_pred_lr, test_y_lr, lr_coefficients) = \
             run_logistic_regression(features_csv=features_csv, patient_id_col=patient_id_col,
@@ -1155,18 +1183,32 @@ if __name__ == '__main__':
 
         # Rename folder
         src_folder_name = os.path.join(exp_dir)
-        dst_folder_name = os.path.join(exp_dir +
-                                       '_{}'.format(seed) +
-                                       '_{}'.format(fold) +
-                                       '_{}'.format(best_epoch) +
-                                       '_{}'.format(model_name) +
-                                       '_params_{}'.format(total_params) +
-                                       '_auc' +
-                                       '_tr_{}'.format(train_auc_value) +
-                                       '_lr_{}'.format(train_auc_lr) +
-                                       '_val_{}'.format(val_auc_value) +
-                                       '_lr_{}'.format(val_auc_lr)
-                                       )
+        if (fold == cv_folds - 1) and (cv_folds > 1):
+            dst_folder_name = os.path.join(exp_dir + '_{}'.format(globals()['ijk']) +
+                                            '_{}'.format(fold) +
+                                            '_{}'.format(num_classes) +
+                                            '_{}'.format(best_epoch) +
+                                            '_{}'.format(model_name) +
+                                            '_auc' +
+                                            '_tr_{}'.format(train_auc_value) +
+                                            # '_lr_{}'.format(train_auc_lr) +
+                                            '_val_{}'.format(val_auc_value)
+                                            # '_lr_{}'.format(val_auc_lr)
+                                            )
+        else:
+            dst_folder_name = os.path.join(exp_dir + '_{}'.format(globals()['ijk']) + '_{}'.format(seed) +
+                                            '_bsl_{}'.format(len(features_dl)) +
+                                            excl + 
+                                            '_{}'.format(fold) +
+                                            '_{}'.format(best_epoch) +
+                                            '_{}'.format(model_name) +
+                                            '_params_{}'.format(total_params) +
+                                            '_auc' +
+                                            '_tr_{}'.format(train_auc_value) +
+                                            # '_lr_{}'.format(train_auc_lr) +
+                                            '_val_{}'.format(val_auc_value)
+                                            # '_lr_{}'.format(val_auc_lr)
+                                            )
 
         if test_dl is not None:
             dst_folder_name += '_test_{}'.format(test_auc_value)
@@ -1191,6 +1233,7 @@ if __name__ == '__main__':
             # Internal validation (avg) and test (ensemble)
             # DL model
             dst_folder_name += '_val'
+
             if max_epochs > 0:
                 # Validation (avg)
                 val_auc_list = [x for x in val_auc_list if x is not None]
@@ -1207,7 +1250,9 @@ if __name__ == '__main__':
             val_auc_lr_list = [x for x in val_auc_lr_list if x is not None]
             val_auc_lr_list_mean = round(sum(val_auc_lr_list) / len(val_auc_lr_list),
                                          nr_of_decimals)
+
             dst_folder_name += '_lr_{}'.format(val_auc_lr_list_mean)
+    
             # Test (ensemble)
             test_auc_lr_mean = misc.compute_auc(y_pred_list=test_y_pred_lr_ens,
                                                 y_true_list=test_y_lr_ens,
