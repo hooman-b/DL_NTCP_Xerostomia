@@ -7,6 +7,9 @@ TODO: Add loop to evaluate different loss function, optimizers and models.
 import os
 import time
 import torch
+import optuna
+import plotly
+import joblib
 import shutil
 import random
 import numpy as np
@@ -138,8 +141,9 @@ def validate(model, dataloader, mean, std, mode,
                                                     rtdose_mean=mean[1], rtdose_std=std[1])
             features = process_data.preprocess_features(features=features)
 
+            print(features)
             # Make predictions
-            outputs = model(x=inputs, features=features)
+            outputs = model(x=inputs, features=features.float())
 
             try:
                 # Cross-Entropy, Ranking, Custom
@@ -277,9 +281,13 @@ def train(model, train_dataloader, val_dataloader, test_dataloader, mean, std, o
                                                           rtdose_mean=mean[1], rtdose_std=std[1])
             train_features = process_data.preprocess_features(features=train_features)
 
+            print('hiiiiiiiiiiiiiiiiiii', train_features)
+            # train_inputs = train_inputs.to(torch.long)
+            # train_features = train_features.to(torch.long)
+
             # Zero the parameter gradients and make predictions
             optimizer.zero_grad(set_to_none=True)
-            train_outputs = model(x=train_inputs, features=train_features)
+            train_outputs = model(x=train_inputs, features=train_features.float())
 
             # Calculate loss
             try:
@@ -514,11 +522,7 @@ def train(model, train_dataloader, val_dataloader, test_dataloader, mean, std, o
     test_mse_values_list, train_auc_values_list, val_auc_values_list, test_auc_values_list, lr_list, batch_size_list,
     epoch + 1, best_epoch)
 
-
-if __name__ == '__main__':
-    global ijk
-    globals()['ijk'] = 0
-
+def optuna_objective(trial):
     # Make sure that data_preproc_config.use_umcg == True
     use_umcg = data_preproc_config.use_umcg
     assert use_umcg
@@ -641,8 +645,6 @@ if __name__ == '__main__':
     optuna_features_dl_list = config.optuna_features_dl_list
     T0 = config.T0
 
-    trial = 0 # erase this at the end
-
     # (Optuna) 2. Suggest values of the hyperparameters using a trial object.
     data_aug_strength = trial.suggest_float('data_aug_strength', 0.0, 3.0)
     data_aug_p = trial.suggest_float('data_aug_p', 0.0, 0.5)
@@ -651,7 +653,7 @@ if __name__ == '__main__':
     batch_size = optuna_batch_size_list[batch_size_idx] 
     
     features_dl_idx = trial.suggest_int('features_dl_idx', 0, len(optuna_features_dl_list) - 1, 1)
-    features_dl = optuna_features_dl_list[features_dl_idx] 
+    features_dl = [optuna_features_dl_list[features_dl_idx]] # Fix this part to get more than one input feature
 
     loss_function_weights_ce = trial.suggest_float('loss_function_weights_ce', 0.0, 1.0)
     loss_function_weights_f1 = trial.suggest_float('loss_function_weights_f1', 0.0, 1.0)
@@ -693,7 +695,7 @@ if __name__ == '__main__':
     
     filter_size_idx = trial.suggest_int('filter_size_idx', 0, len(optuna_filters_list) - 1, 1)
     filter_size = optuna_filters_list[filter_size_idx]
-    n_layers = trial.suggest_int('n_layers', 4, 5)
+    n_layers = trial.suggest_int('n_layers', 4, 4) # (4, 4) for resnet_lrelu #, 5)
     filters = filter_size[:n_layers]  
     kernel_sizes_i_tmp = [optuna_max_kernel_size]
     kernel_sizes = list()
@@ -835,38 +837,40 @@ if __name__ == '__main__':
         # Training-validation-test split
         else:
             train_dict, val_dict, test_dict = [None] * 3
-
+        
+        print('hiiiiiiiiiiiiiiiiiiiiiii', features_dl)
         (train_dl, val_dl, test_dl, train_ds, dl_class, train_dl_args_dict, batch_size, channels,
-         depth, height, width, n_train_0, n_train_1, n_val_0, n_val_1, n_test_0, n_test_1,
-         n_features, train_dict, val_dict, test_dict, norm_mean, norm_std) = \
+        depth, height, width, n_train_0, n_train_1, n_val_0, n_val_1, n_test_0, n_test_1,
+        n_features, train_dict, val_dict, test_dict, norm_mean, norm_std) = \
             load_data.main(train_dict=train_dict, val_dict=val_dict, test_dict=test_dict,
-                           features=features_dl, perform_data_aug=perform_data_aug, data_aug_p=data_aug_p,
-                           data_aug_strength=data_aug_strength, rand_cropping_size=rand_cropping_size,
-                           input_size=input_size, resize_mode=resize_mode, seg_orig_labels=seg_orig_labels,
-                           seg_target_labels=seg_target_labels, batch_size=batch_size,
-                           use_sampler=use_sampler, fold=fold, drop_last=dataloader_drop_last,
-                           sampling_type=sampling_type,
-                           filename_stratified_sampling_test_csv=filename_stratified_sampling_test_csv,
-                           filename_stratified_sampling_full_csv=filename_stratified_sampling_full_csv,
-                           perform_stratified_sampling_full=perform_stratified_sampling_full,
-                           seed=seed, device=device, logger=logger)
+                        features=features_dl, perform_data_aug=perform_data_aug, data_aug_p=data_aug_p,
+                        data_aug_strength=data_aug_strength, rand_cropping_size=rand_cropping_size,
+                        input_size=input_size, resize_mode=resize_mode, seg_orig_labels=seg_orig_labels,
+                        seg_target_labels=seg_target_labels, batch_size=batch_size,
+                        use_sampler=use_sampler, fold=fold, drop_last=dataloader_drop_last,
+                        sampling_type=sampling_type,
+                        filename_stratified_sampling_test_csv=filename_stratified_sampling_test_csv,
+                        filename_stratified_sampling_full_csv=filename_stratified_sampling_full_csv,
+                        perform_stratified_sampling_full=perform_stratified_sampling_full,
+                        seed=seed, device=device, logger=logger)
         logger.my_print('Input shape: {}.'.format([batch_size, channels, depth, height, width]))
         num_batches_per_epoch = len(train_dl)
         norm_mean_dict[fold] = norm_mean
         norm_std_dict[fold] = norm_std
 
         # Initialize model
+        print('hiiiiiiiiiiiiiiiiiiii', n_features)
         model = misc.get_model(model_name=model_name, num_ohe_classes=num_ohe_classes, channels=channels,
-                               depth=depth, height=height, width=width, n_features=n_features,
-                               resnet_shortcut=resnet_shortcut,
-                               num_classes=num_classes, filters=filters, kernel_sizes=kernel_sizes, strides=strides,
-                               pad_value=pad_value,
-                               lrelu_alpha=lrelu_alpha, dropout_p=dropout_p, pooling_conv_filters=pooling_conv_filters,
-                               perform_pooling=perform_pooling, linear_units=linear_units,
-                               clinical_variables_position=clinical_variables_position,
-                               clinical_variables_linear_units=clinical_variables_linear_units,
-                               clinical_variables_dropout_p=clinical_variables_dropout_p,
-                               use_bias=use_bias, pretrained_path=pretrained_path_i, logger=logger)
+                            depth=depth, height=height, width=width, n_features=n_features,
+                            resnet_shortcut=resnet_shortcut,
+                            num_classes=num_classes, filters=filters, kernel_sizes=kernel_sizes, strides=strides,
+                            pad_value=pad_value,
+                            lrelu_alpha=lrelu_alpha, dropout_p=dropout_p, pooling_conv_filters=pooling_conv_filters,
+                            perform_pooling=perform_pooling, linear_units=linear_units,
+                            clinical_variables_position=clinical_variables_position,
+                            clinical_variables_linear_units=clinical_variables_linear_units,
+                            clinical_variables_dropout_p=clinical_variables_dropout_p,
+                            use_bias=use_bias, pretrained_path=pretrained_path_i, logger=logger)
         model.to(device=device)
 
         # Compile model (PyTorch 2)
@@ -887,10 +891,10 @@ if __name__ == '__main__':
             logger.my_print('Using pretrained weights: {}.'.format(pretrained_path_i))
 
         elif ((pretrained_path_i is None) and
-              (weight_init_name is not None) and
-              ('efficientnet' not in model_name) and
-              ('convnext' not in model_name) and
-              ('resnext' not in model_name)):
+            (weight_init_name is not None) and
+            ('efficientnet' not in model_name) and
+            ('convnext' not in model_name) and
+            ('resnext' not in model_name)):
 
             # Source: https://pytorch.org/docs/stable/generated/torch.nn.Module.html
             model.apply(lambda m: misc.weights_init(m=m,
@@ -912,17 +916,17 @@ if __name__ == '__main__':
         # Important note: torchinfo.summary() somehow uses some random() on input_size, because it will create
         # random input. I.e. input_size changes the next random values.
         total_params = misc.get_model_summary(model=model, 
-                                              input_size=[(batch_size, channels, depth, height, width),
-                                                                       (batch_size, max(n_features, 1))],
-                                              device=device,
-                                              logger=logger)
+                                            input_size=[(batch_size, channels, depth, height, width),
+                                                                    (batch_size, max(n_features, 1))],
+                                            device=device,
+                                            logger=logger)
 
         # Initialize loss function
         loss_function = misc.get_loss_function(loss_function_name=loss_function_name, 
-                                               label_weights=label_weights,
-                                               label_smoothing=label_smoothing, 
-                                               loss_weights=loss_weights,
-                                               device=device)
+                                            label_weights=label_weights,
+                                            label_smoothing=label_smoothing, 
+                                            loss_weights=loss_weights,
+                                            device=device)
 
         # Compile model (PyTorch 2) #########################
         # if torch_version.startswith('2.') and not os.name == 'nt':
@@ -940,10 +944,10 @@ if __name__ == '__main__':
             lr = base_lr
 
         optimizer = misc.get_optimizer(optimizer_name=optimizer_name, model=model, lr=lr, momentum=momentum,
-                                       weight_decay=weight_decay, hessian_power=hessian_power,
-                                       num_batches_per_epoch=num_batches_per_epoch, use_lookahead=use_lookahead,
-                                       lookahead_k=lookahead_k,
-                                       lookahead_alpha=lookahead_alpha, logger=logger)
+                                    weight_decay=weight_decay, hessian_power=hessian_power,
+                                    num_batches_per_epoch=num_batches_per_epoch, use_lookahead=use_lookahead,
+                                    lookahead_k=lookahead_k,
+                                    lookahead_alpha=lookahead_alpha, logger=logger)
 
         # Perform learning rate finder
         if lr_finder_num_iter > 0 and (config.max_epochs > 0):
@@ -966,41 +970,41 @@ if __name__ == '__main__':
         # Initialize scheduler
         # Note: should be performed after learning_rate_finder()
         scheduler = misc.get_scheduler(scheduler_name=scheduler_name, optimizer=optimizer, optimal_lr=lr, T_0=T_0,
-                                       T_mult=T_mult, eta_min=eta_min, step_size_up=step_size_up, gamma=gamma,
-                                       step_size=step_size, warmup_batches=warmup_batches,
-                                       num_batches_per_epoch=num_batches_per_epoch,
-                                       lr_finder_num_iter=lr_finder_num_iter, logger=logger)
+                                    T_mult=T_mult, eta_min=eta_min, step_size_up=step_size_up, gamma=gamma,
+                                    step_size=step_size, warmup_batches=warmup_batches,
+                                    num_batches_per_epoch=num_batches_per_epoch,
+                                    lr_finder_num_iter=lr_finder_num_iter, logger=logger)
 
         # Train model
         (train_loss_values, val_loss_values, test_loss_values, train_mse_values, val_mse_values, test_mse_values,
-         train_auc_values, val_auc_values, test_auc_values, lr_values, batch_size_values, epochs, best_epoch) = \
+        train_auc_values, val_auc_values, test_auc_values, lr_values, batch_size_values, epochs, best_epoch) = \
             train(model=model, train_dataloader=train_dl, val_dataloader=val_dl, test_dataloader=test_dl,
-                      mean=norm_mean_dict[fold], std=norm_std_dict[fold],
-                      optimizer=optimizer, optimizer_name_next=optimizer_name_next,
-                      dl_class=dl_class, train_dl_args_dict=train_dl_args_dict, num_classes=num_classes,
-                      max_epochs=max_epochs, perform_augmix=perform_augmix, mixture_width=mixture_width,
-                      mixture_depth=mixture_depth, augmix_strength=augmix_strength, optimizer_name=optimizer_name,
-                      grad_max_norm=grad_max_norm, scheduler_name=scheduler_name, scheduler=scheduler,
-                      loss_function_name=loss_function_name, sigmoid_act=sigmoid_act, softmax_act=softmax_act,
-                      to_onehot=to_onehot, patience=patience, patience_lr=patience_lr, patience_opt=patience_opt,
-                      loss_function=loss_function, auc_metric=auc_metric, mse_metric=mse_metric,
-                      data_aug_p=data_aug_p, data_aug_strength=data_aug_strength, max_batch_size=max_batch_size,
-                      manual_lr=manual_lr, momentum=momentum, weight_decay=weight_decay, hessian_power=hessian_power,
-                      num_batches_per_epoch=num_batches_per_epoch, use_lookahead=use_lookahead,
-                      lookahead_k=lookahead_k, lookahead_alpha=lookahead_alpha, device=device,
-					  model_name=model_name, exp_dir=exp_dir,
-                      logger=logger)
+                    mean=norm_mean_dict[fold], std=norm_std_dict[fold],
+                    optimizer=optimizer, optimizer_name_next=optimizer_name_next,
+                    dl_class=dl_class, train_dl_args_dict=train_dl_args_dict, num_classes=num_classes,
+                    max_epochs=max_epochs, perform_augmix=perform_augmix, mixture_width=mixture_width,
+                    mixture_depth=mixture_depth, augmix_strength=augmix_strength, optimizer_name=optimizer_name,
+                    grad_max_norm=grad_max_norm, scheduler_name=scheduler_name, scheduler=scheduler,
+                    loss_function_name=loss_function_name, sigmoid_act=sigmoid_act, softmax_act=softmax_act,
+                    to_onehot=to_onehot, patience=patience, patience_lr=patience_lr, patience_opt=patience_opt,
+                    loss_function=loss_function, auc_metric=auc_metric, mse_metric=mse_metric,
+                    data_aug_p=data_aug_p, data_aug_strength=data_aug_strength, max_batch_size=max_batch_size,
+                    manual_lr=manual_lr, momentum=momentum, weight_decay=weight_decay, hessian_power=hessian_power,
+                    num_batches_per_epoch=num_batches_per_epoch, use_lookahead=use_lookahead,
+                    lookahead_k=lookahead_k, lookahead_alpha=lookahead_alpha, device=device,
+                    model_name=model_name, exp_dir=exp_dir,
+                    logger=logger)
 
         if max_epochs > 0:
             # Plot training and internal validation losses
             y_list = [[train_loss_values, val_loss_values],
-                      [train_mse_values, val_mse_values],
-                      [train_auc_values, val_auc_values], [lr_values],
-                      [batch_size_values]]
+                    [train_mse_values, val_mse_values],
+                    [train_auc_values, val_auc_values], [lr_values],
+                    [batch_size_values]]
             y_label_list = ['Loss', 'MSE', 'AUC', 'LR', 'Batch_size']
             legend_list = [['Training', 'Internal validation']] * (len(y_list) - 2) + [None, None]
             misc.plot_values(y_list=y_list, y_label_list=y_label_list, best_epoch=best_epoch, legend_list=legend_list,
-                             figsize=config.figsize, save_filename=os.path.join(exp_dir, config.filename_results_png))
+                            figsize=config.figsize, save_filename=os.path.join(exp_dir, config.filename_results_png))
 
             # Load best model
             model.load_state_dict(torch.load(os.path.join(exp_dir, config.filename_best_model_pth)))
@@ -1058,15 +1062,15 @@ if __name__ == '__main__':
 
             # Save predictions on training, validation and test set
             misc.save_predictions(patient_ids=all_patient_ids, y_pred_list=all_y_pred_list, y_true_list=all_y_list,
-                                  mode_list=all_modes, num_classes=num_classes, model_name=model_name + '_all',
-                                  exp_dir=exp_dir, logger=logger)
+                                mode_list=all_modes, num_classes=num_classes, model_name=model_name + '_all',
+                                exp_dir=exp_dir, logger=logger)
 
         # Run logistic regression (LR) model (reference model)
         features_csv = os.path.join(config.data_dir, data_preproc_config.filename_features_csv)
         patient_ids_json = os.path.join(exp_dir, config.filename_train_val_test_patient_ids_json.format(fold))
 
         (train_patient_ids_lr, train_y_pred_lr, train_y_lr, val_patient_ids_lr, val_y_pred_lr, val_y_lr,
-         test_patient_ids_lr, test_y_pred_lr, test_y_lr, lr_coefficients) = \
+        test_patient_ids_lr, test_y_pred_lr, test_y_lr, lr_coefficients) = \
             run_logistic_regression(features_csv=features_csv, patient_id_col=patient_id_col,
                                     baseline_col=data_preproc_config.baseline_col,
                                     submodels_features=data_preproc_config.submodels_features, features=features_lr,
@@ -1098,7 +1102,7 @@ if __name__ == '__main__':
             test_y_pred_lr_list = [x for x in test_y_pred_lr]
             test_y_lr_list = [to_onehot(i) for i in test_y_lr]
             test_auc_lr = misc.compute_auc(y_pred_list=test_y_pred_lr_list, y_true_list=test_y_lr_list,
-                                           auc_metric=auc_metric)
+                                        auc_metric=auc_metric)
 
             # Determine patient_ids in test set (for misc.save_predictions())
             mode_lr_list = ['test'] * len(test_patient_ids_lr)
@@ -1110,8 +1114,8 @@ if __name__ == '__main__':
 
             # Save outputs to csv
             misc.save_predictions(patient_ids=test_patient_ids_lr, y_pred_list=test_y_pred_lr_list,
-                                  y_true_list=test_y_lr_list, mode_list=mode_lr_list, num_classes=num_classes,
-                                  model_name='lr', exp_dir=exp_dir, logger=logger)
+                                y_true_list=test_y_lr_list, mode_list=mode_lr_list, num_classes=num_classes,
+                                model_name='lr', exp_dir=exp_dir, logger=logger)
 
             if (test_y_pred_lr_sum is None) and (test_y_lr_sum is None):
                 test_y_pred_lr_sum = test_y_pred_lr_list
@@ -1130,20 +1134,20 @@ if __name__ == '__main__':
                     test_y_pred_ens = [x / cv_folds for x in test_y_pred_sum]
                     test_y_ens = [x / cv_folds for x in test_y_sum]
                     misc.save_predictions(patient_ids=test_patient_ids, y_pred_list=test_y_pred_ens,
-                                          y_true_list=test_y_ens, mode_list=mode_lr_list, num_classes=num_classes,
-                                          model_name=model_name + '_ens', exp_dir=exp_dir, logger=logger)
+                                        y_true_list=test_y_ens, mode_list=mode_lr_list, num_classes=num_classes,
+                                        model_name=model_name + '_ens', exp_dir=exp_dir, logger=logger)
 
                 assert len(set([tuple(x.tolist()) for x in test_y_lr_sum])) == num_classes
                 test_y_pred_lr_ens = [x / cv_folds for x in test_y_pred_lr_sum]
                 test_y_lr_ens = [x / cv_folds for x in test_y_lr_sum]
                 misc.save_predictions(patient_ids=test_patient_ids_lr, y_pred_list=test_y_pred_lr_ens,
-                                      y_true_list=test_y_lr_ens, mode_list=mode_lr_list, num_classes=num_classes,
-                                      model_name='lr_ens', exp_dir=exp_dir, logger=logger)
+                                    y_true_list=test_y_lr_ens, mode_list=mode_lr_list, num_classes=num_classes,
+                                    model_name='lr_ens', exp_dir=exp_dir, logger=logger)
 
         # Save predictions on training, validation and test set
         misc.save_predictions(patient_ids=all_patient_ids_lr, y_pred_list=all_y_pred_lr_list, y_true_list=all_y_lr_list,
-                              mode_list=all_modes_lr, num_classes=num_classes, model_name='lr_all', exp_dir=exp_dir,
-                              logger=logger)
+                            mode_list=all_modes_lr, num_classes=num_classes, model_name='lr_all', exp_dir=exp_dir,
+                            logger=logger)
 
         if max_epochs > 0:
             # Create results.csv
@@ -1160,16 +1164,16 @@ if __name__ == '__main__':
                                 n=n_train_0 + n_train_1 + n_val_0 + n_val_1 + n_test_0 + n_test_1,
                                 n_train=[n_train_0, n_train_1], n_val=[n_val_0, n_val_1], n_test=[n_test_0, n_test_1],
                                 train_val_test_frac=[config.train_frac, config.val_frac,
-                                                     1 - config.train_frac - config.val_frac],
+                                                    1 - config.train_frac - config.val_frac],
                                 cv_folds=cv_folds, input_shape=[batch_size, channels, depth, height, width],
                                 normalization_mean_dict=norm_mean_dict, normalization_std_dict=norm_std_dict,
                                 ct_b_min_max=[config.ct_b_min, config.ct_b_max],
                                 rtdose_b_min_max=[config.rtdose_b_min, config.rtdose_b_max],
                                 seg_orig_labels=seg_orig_labels, seg_target_labels=seg_target_labels,
                                 interpolation_mode_3d=[config.ct_interpol_mode_3d, config.rtdose_interpol_mode_3d,
-                                                       config.segmentation_interpol_mode_3d],
+                                                    config.segmentation_interpol_mode_3d],
                                 interpolation_mode_2d=[config.ct_interpol_mode_2d, config.rtdose_interpol_mode_2d,
-                                                       config.segmentation_interpol_mode_2d],
+                                                    config.segmentation_interpol_mode_2d],
                                 perform_augmix=perform_augmix, weight_init_name=weight_init_name,
                                 optimizer=optimizer_name, optimizer_name_next=optimizer_name_next,
                                 loss_function=loss_function_name, label_weights=label_weights,
@@ -1227,7 +1231,7 @@ if __name__ == '__main__':
             # LR training (avg)
             train_auc_lr_list = [x for x in train_auc_lr_list if x is not None]
             train_auc_lr_list_mean = round(sum(train_auc_lr_list) / len(train_auc_lr_list),
-                                           nr_of_decimals)
+                                        nr_of_decimals)
             dst_folder_name += '_tr_{}_lr_{}'.format(train_auc_list_mean, train_auc_lr_list_mean)
 
             # Internal validation (avg) and test (ensemble)
@@ -1241,15 +1245,15 @@ if __name__ == '__main__':
 
                 # Test (ensemble)
                 test_auc_mean = misc.compute_auc(y_pred_list=test_y_pred_ens,
-                                                 y_true_list=test_y_ens,
-                                                 auc_metric=auc_metric)
+                                                y_true_list=test_y_ens,
+                                                auc_metric=auc_metric)
             dst_folder_name += '_{}'.format(val_auc_list_mean)
 
             # LR model
             # Validation (avg)
             val_auc_lr_list = [x for x in val_auc_lr_list if x is not None]
             val_auc_lr_list_mean = round(sum(val_auc_lr_list) / len(val_auc_lr_list),
-                                         nr_of_decimals)
+                                        nr_of_decimals)
 
             dst_folder_name += '_lr_{}'.format(val_auc_lr_list_mean)
     
@@ -1269,4 +1273,60 @@ if __name__ == '__main__':
         # # run.id = dst_folder_name.replace(os.path.join(config.exp_root_dir), '')[1:]
         # run.finish()
 
+    # Save optuna objects
+    joblib.dump(optuna_study, optuna_out_file_study)
+    # Save the sampler for reproducibility after resuming study
+    joblib.dump(optuna_study.sampler, optuna_out_file_sampler)
+    
+    # Optuna objectives to maximize, e.g., validation value
+    return val_auc_list_mean
 
+
+if __name__ == '__main__':
+    global ijk
+    globals()['ijk'] = 0
+
+    # (Optuna) 3. Create a study object and optimize the objective function.
+    # Resume study if study and sampler files exist
+    # Source: https://optuna.readthedocs.io/en/stable/tutorial/20_recipes/001_rdb.html
+    exp_root_dir = config.exp_root_dir
+    optuna_path_pickles = config.optuna_path_pickles
+    optuna_path_figures = config.optuna_path_figures
+    for p in [exp_root_dir, optuna_path_pickles, optuna_path_figures]:
+        create_folder_if_not_exists(p)
+        
+    optuna_study_name = 'optuna_study.pkl'
+    optuna_sampler_name = 'optuna_sampler.pkl'
+    optuna_n_trials = 2
+    
+    optuna_file_study_list = [x for x in os.listdir(optuna_path_pickles) if optuna_study_name in x]
+    optuna_file_sampler_list = [x for x in os.listdir(optuna_path_pickles) if optuna_sampler_name in x]
+    if len(optuna_file_study_list) > 0 and len(optuna_file_sampler_list) > 0:
+        # Find latest study, and add 1 for the next study run
+        optuna_study_run_nr = max([int(x.split('_')[0]) for x in optuna_file_study_list]) + 1
+        optuna_sampler_run_nr = max([int(x.split('_')[0]) for x in optuna_file_sampler_list]) + 1
+        assert optuna_study_run_nr == optuna_sampler_run_nr
+        
+        optuna_in_file_study = os.path.join(optuna_path_pickles, '{}_'.format(optuna_study_run_nr - 1) + optuna_study_name)
+        optuna_in_file_sampler = os.path.join(optuna_path_pickles, '{}_'.format(optuna_sampler_run_nr - 1) + optuna_sampler_name)
+        print('Resuming previous study: {}'.format(optuna_in_file_study))
+    
+        optuna_sampler = joblib.load(optuna_in_file_sampler)
+        optuna_study = joblib.load(optuna_in_file_study)
+    else:
+        optuna_study_run_nr = 0
+        optuna_sampler_run_nr = 0
+        
+        optuna_sampler = optuna.samplers.TPESampler(seed=123)
+        optuna_study = optuna.create_study(sampler=optuna_sampler, direction='maximize')
+        
+    # Create study
+    optuna_out_file_study = os.path.join(optuna_path_pickles, '{}_'.format(optuna_study_run_nr) + optuna_study_name)
+    optuna_out_file_sampler = os.path.join(optuna_path_pickles, '{}_'.format(optuna_sampler_run_nr) + optuna_sampler_name)
+    joblib.dump(optuna_study, optuna_out_file_study)
+    joblib.dump(optuna_study.sampler, optuna_out_file_sampler)
+    
+    # Run hyperparameter tuning
+    optuna_study.optimize(optuna_objective, n_trials=optuna_n_trials)
+    joblib.dump(optuna_study, optuna_out_file_study)
+    joblib.dump(optuna_study.sampler, optuna_out_file_sampler)

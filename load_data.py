@@ -139,7 +139,7 @@ def get_files(sampling_type, features, filename_stratified_sampling_test_csv, fi
         logger.my_print('Patient_id = {} will be excluded.'.format('%0.{}d'.format(patient_id_length) % p))
 
     # Load features
-    df_features = pd.read_csv(os.path.join(data_dir, filename_stratified_sampling_test_csv), sep=';', decimal=',')
+    df_features = pd.read_csv(os.path.join(data_dir, filename_stratified_sampling_test_csv), sep=';') #, decimal=',')
     df_features[patient_id_col] = ['%0.{}d'.format(patient_id_length) % int(x) for x in df_features[patient_id_col]]
 
     # Create list of images and labels
@@ -152,12 +152,16 @@ def get_files(sampling_type, features, filename_stratified_sampling_test_csv, fi
     patient_ids_list = df_features[patient_id_col].values.tolist()
     # sort() to make sure that different platforms use the same order --> required for random.shuffle() later
     patient_ids_list.sort()
+    
     for patient_id in patient_ids_list:
         # Patient's features data
         df_features_i = df_features[df_features[patient_id_col] == patient_id]
         # Features
-        features_list += [[float(str(x).replace(',', '.')) for x in y] for y in
+        features_list += [y for y in
                           df_features_i[features].values.tolist()]
+
+        # features_list += [[float(str(x).replace(',', '.')) for x in y] for y in
+        #                   df_features_i[features].values.tolist()]
         # Endpoint
         labels_list.append(int(df_features_i[data_preproc_config.endpoint]))
 

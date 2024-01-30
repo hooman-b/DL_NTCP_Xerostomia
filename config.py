@@ -274,8 +274,8 @@ if perform_test_run:
 
 ##### Optuna (Hyperparameter Tunning)#####
 # Add optuna initializing variables
-optuna_path_pickles = os.path.join(root_path, 'optuna_pickles') # Ask about thiese two
-optuna_path_figures = os.path.join(root_path, 'optuna_figures')
+optuna_path_pickles = os.path.join(exp_root_dir, 'pickles')
+optuna_path_figures = os.path.join(exp_root_dir, 'figures')
 
 # Optuna Basic parameters
 optuna_batch_size_list = [2, 4, 8, 16]
@@ -283,10 +283,11 @@ optuna_filters_list = [[16, 16, 32, 32, 64], [8, 8, 16, 32, 64], [16, 16, 32, 64
 optuna_min_kernel_size = 3
 optuna_max_kernel_size = 7
 optuna_linear_units_size = [1, 2, 3]
-optuna_clinical_variables_linear_units_size = [1, 2, 3]
+optuna_clinical_variables_linear_units_size = [1, 2] #, 3]
 optuna_linear_units_list = [8, 16, 32, 64]
 optuna_clinical_variables_linear_units_list = [8, 16, 32, 64]
-optuna_features_dl_list = [['LEEFTIJD','Smoking_Active','T1','T2','T3','T4','N1','N2','N3','Larynx','Oropharynx','Hypopharynx','OralCavity','Nasopharynx','Chemo',
-'Taste_W01','Xer_W01_Little','Xer_W01_Quite','Xer_W01_Very','Dys_W01'],['LEEFTIJD','Smoking_Active','T1','T2','T3','T4','N1','N2','N3','Larynx','Oropharynx','Hypopharynx','OralCavity','Nasopharynx','Chemo'],
-['Taste_W01','Xer_W01_Little','Xer_W01_Quite','Xer_W01_Very','Dys_W01'],['LEEFTIJD']]
+optuna_features_dl_list = ['xer_bsl', 'Parotid_Dmean'] 
+# optuna_features_dl_list = [['LEEFTIJD','Smoking_Active','T1','T2','T3','T4','N1','N2','N3','Larynx','Oropharynx','Hypopharynx','OralCavity','Nasopharynx','Chemo',
+# 'Taste_W01','Xer_W01_Little','Xer_W01_Quite','Xer_W01_Very','Dys_W01'],['LEEFTIJD','Smoking_Active','T1','T2','T3','T4','N1','N2','N3','Larynx','Oropharynx','Hypopharynx','OralCavity','Nasopharynx','Chemo'],
+# ['Taste_W01','Xer_W01_Little','Xer_W01_Quite','Xer_W01_Very','Dys_W01'],['LEEFTIJD']]
 T0 = [10,20,30,40]
