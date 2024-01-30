@@ -507,6 +507,9 @@ def train(model, train_dataloader, val_dataloader, test_dataloader, mean, std, o
 
 
 if __name__ == '__main__':
+    global ijk
+    globals()['ijk'] = 0
+
     # Make sure that data_preproc_config.use_umcg == True
     use_umcg = data_preproc_config.use_umcg
     assert use_umcg
@@ -615,6 +618,134 @@ if __name__ == '__main__':
     random.seed(a=seed)
     np.random.seed(seed=seed)
     torch.backends.cudnn.benchmark = cudnn_benchmark # For now, it is equal to False, but it may change to True in the future.
+    excel = ''
+
+    # Optuna
+    optuna_batch_size_list = config.optuna_batch_size_list
+    optuna_filters_list = config.optuna_filters_list
+    optuna_min_kernel_size = config.optuna_min_kernel_size
+    optuna_max_kernel_size = config.optuna_max_kernel_size
+    optuna_linear_units_size = config.optuna_linear_units_size
+    optuna_clinical_variables_linear_units_size = config.optuna_clinical_variables_linear_units_size
+    optuna_linear_units_list = config.optuna_linear_units_list
+    optuna_clinical_variables_linear_units_list = config.optuna_clinical_variables_linear_units_list
+    optuna_features_dl_list = config.optuna_features_dl_list
+    T0 = config.T0
+
+    trial = 0 # erase this at the end
+
+    # (Optuna) 2. Suggest values of the hyperparameters using a trial object.
+    data_aug_strength = trial.suggest_float('data_aug_strength', 0.0, 3.0)
+    data_aug_p = trial.suggest_float('data_aug_p', 0.0, 0.5)
+    augmix_strength = trial.suggest_float('augmix_strength', 0.0, 3.0)
+    batch_size_idx = trial.suggest_int('batch_size_idx', 0, len(optuna_batch_size_list) - 1, 1)
+    batch_size = optuna_batch_size_list[batch_size_idx] 
+    
+    features_dl_idx = trial.suggest_int('features_dl_idx', 0, len(optuna_features_dl_list) - 1, 1)
+    features_dl = optuna_features_dl_list[features_dl_idx] 
+
+    loss_function_weights_ce = trial.suggest_float('loss_function_weights_ce', 0.0, 1.0)
+    loss_function_weights_f1 = trial.suggest_float('loss_function_weights_f1', 0.0, 1.0)
+    loss_function_weights_dice = trial.suggest_float('loss_function_weights_dice', 0.0, 1.0)
+    loss_function_weights_l1 = trial.suggest_float('loss_function_weights_l1', 0.0, 1.0)
+    loss_function_weights_ranking = trial.suggest_float('loss_function_weights_ranking', 0.0, 1.0)
+    loss_function_weights_softauc = trial.suggest_float('loss_function_weights_softauc', 0.0, 1.0)
+    loss_weights = [loss_function_weights_ce, loss_function_weights_f1, loss_function_weights_dice, 
+                                loss_function_weights_l1, loss_function_weights_ranking, loss_function_weights_softauc]
+
+    optimizer_name = trial.suggest_categorical('optimizer_name', ['adam','rmsprop'])
+
+    
+    linear_units_size_idx = trial.suggest_int('linear_units_size_idx', 0, len(optuna_linear_units_size) -1, 1)
+    linear_units_size = optuna_linear_units_size[linear_units_size_idx]
+    linear_units = list()
+    dropout_p = list()
+    
+    for _ in range(linear_units_size): 
+        linear_units_idx = trial.suggest_int('linear_units_idx', 0, len(optuna_linear_units_list) -1, 1)
+        linear_units_j = optuna_linear_units_list[linear_units_idx]
+        linear_units.append(linear_units_j)
+        dropout_p_j = trial.suggest_float('dropout_p_j', 0.0, 0.5)
+        dropout_p.append(dropout_p_j)
+
+    clinical_variables_linear_units_size_idx = trial.suggest_int('clinical_variables_linear_units_size_idx', 0, len(optuna_clinical_variables_linear_units_size) -1, 1)
+    clinical_variables_linear_units_size= optuna_clinical_variables_linear_units_size[clinical_variables_linear_units_size_idx]
+    clinical_variables_linear_units = list()
+    clinical_variables_dropout_p = list()
+
+    for _ in range(clinical_variables_linear_units_size): 
+        clinical_variables_linear_units_idx = trial.suggest_int('clinical_variables_linear_units_idx', 0, len(optuna_clinical_variables_linear_units_list) -1, 1)
+        clinical_variables_linear_units_j = optuna_clinical_variables_linear_units_list[clinical_variables_linear_units_idx]
+        clinical_variables_linear_units.append(clinical_variables_linear_units_j)
+        clinical_variables_dropout_p_j = trial.suggest_float('clinical_variables_dropout_p_j', 0.0, 0.5)
+        clinical_variables_dropout_p.append(clinical_variables_dropout_p_j)
+
+    clinical_variables_position = trial.suggest_int('clinical_variables_position', 0, linear_units_size - 1, 1)
+    
+    filter_size_idx = trial.suggest_int('filter_size_idx', 0, len(optuna_filters_list) - 1, 1)
+    filter_size = optuna_filters_list[filter_size_idx]
+    n_layers = trial.suggest_int('n_layers', 4, 5)
+    filters = filter_size[:n_layers]  
+    kernel_sizes_i_tmp = [optuna_max_kernel_size]
+    kernel_sizes = list()
+    strides = list()
+
+    for i in range(n_layers):  
+        # Note: `min(kernel_sizes_i_tmp)` is used to make sure that kernel_size does not become larger for later layers
+        # min(..., 128 / (2**(i+1)) is used to make sure that kernel_size is not larger than feature_map size
+        if round(128 / (2**(i+1))) >= optuna_min_kernel_size:
+            kernel_sizes_i = trial.suggest_int('kernel_sizes_{}'.format(i), 
+                                                optuna_min_kernel_size, 
+                                                min(kernel_sizes_i_tmp))
+        # If the feature map size is smaller than `optuna_min_kernel_size` (e.g.,: 2x2 vs. 3), then use 
+        # kernel_size smaller than `optuna_min_kernel_size`.
+        # elif: round(128 / (2**(i+1))) < optuna_min_kernel_size:
+        else: 
+            kernel_sizes_i = trial.suggest_int('kernel_sizes_{}'.format(i), 
+                                                1, min(min(kernel_sizes_i_tmp), 128 / (2**(i+1)))) 
+
+        kernel_sizes_i_tmp.append(kernel_sizes_i)
+        kernel_sizes.append([1, kernel_sizes_i, kernel_sizes_i])
+
+        if i == n_layers - 1:
+            stride_value_last_layer = trial.suggest_int('stride_value_last_layer', 1, 2) 
+            strides.append([stride_value_last_layer] * 3)
+        else:
+            strides.append([2] * 3)
+
+
+    lr = trial.suggest_float('lr', 5e-5, 1e-3)
+
+    optuna_step_size_up = [16*batch_size, 32*batch_size, 64*batch_size]
+    scheduler_name = trial.suggest_categorical('scheduler_name', ['cyclic'])
+    if scheduler_name is not None:
+        if scheduler_name == 'cosine':
+            T_0 = trial.suggest_int('T_0', 8, 64)
+        elif scheduler_name == 'cyclic':
+            step_size_up_idx = trial.suggest_int('step_size_up_idx', 0, len(optuna_step_size_up) - 1, 1)
+            step_size_up = optuna_step_size_up[step_size_up_idx]
+        elif scheduler_name == 'exponential':
+            gamma = trial.suggest_float('gamma',0.9,1.0)
+        else:
+            raise ValueError('Scheduler_name = {} is not available'.format(scheduler_name))
+        
+    use_momentum = trial.suggest_categorical('use_momentum', [True, False])
+    if use_momentum:
+        momentum = trial.suggest_float('momentum', 0, 1.0)
+    else:
+        momentum = 0
+        
+    weight_decay = trial.suggest_float('weight_decay', 0.0, 0.1)
+    label_smoothing = trial.suggest_float('label_smoothing', 0.0, 0.1)
+
+    # (Add this one if you add features)
+    # seg_target_labels = list()  
+    # for k in range(17):
+    #     seg_target_labels_k = trial.suggest_float('seg_target_labels_{}'.format(k), 0.0, 1.0)
+    #     seg_target_labels.append(seg_target_labels_k)	
+    # use_bias = trial.suggest_categorical('use_bias', [True, False])
+
+
 
     # Initialize W&B
     # run = wandb.init(project='DL_NTCP', reinit=True, mode=wandb_mode)
