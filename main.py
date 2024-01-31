@@ -1297,7 +1297,7 @@ if __name__ == '__main__':
         
     optuna_study_name = 'optuna_study.pkl'
     optuna_sampler_name = 'optuna_sampler.pkl'
-    optuna_n_trials = 2 # It should change to 100
+    optuna_n_trials = 100 # It should change to 100
     
     optuna_file_study_list = [x for x in os.listdir(optuna_path_pickles) if optuna_study_name in x]
     optuna_file_sampler_list = [x for x in os.listdir(optuna_path_pickles) if optuna_sampler_name in x]
