@@ -4,6 +4,9 @@ independently testing the final ensemble model.
 
 TODO: Add loop to evaluate different loss function, optimizers and models.
 """
+import torch._dynamo
+torch._dynamo.config.suppress_errors = True
+
 import os
 import time
 import torch
