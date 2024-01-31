@@ -653,7 +653,7 @@ def optuna_objective(trial):
     batch_size = optuna_batch_size_list[batch_size_idx] 
     
     features_dl_idx = trial.suggest_int('features_dl_idx', 0, len(optuna_features_dl_list) - 1, 1)
-    features_dl = [optuna_features_dl_list[features_dl_idx]] # Fix this part to get more than one input feature
+    features_dl = optuna_features_dl_list[features_dl_idx] # Fix this part to get more than one input feature
 
     loss_function_weights_ce = trial.suggest_float('loss_function_weights_ce', 0.0, 1.0)
     loss_function_weights_f1 = trial.suggest_float('loss_function_weights_f1', 0.0, 1.0)
@@ -1297,7 +1297,7 @@ if __name__ == '__main__':
         
     optuna_study_name = 'optuna_study.pkl'
     optuna_sampler_name = 'optuna_sampler.pkl'
-    optuna_n_trials = 2
+    optuna_n_trials = 2 # It should change to 100
     
     optuna_file_study_list = [x for x in os.listdir(optuna_path_pickles) if optuna_study_name in x]
     optuna_file_sampler_list = [x for x in os.listdir(optuna_path_pickles) if optuna_sampler_name in x]

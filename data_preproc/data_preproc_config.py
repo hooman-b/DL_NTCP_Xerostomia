@@ -13,12 +13,12 @@ use_umcg = True
 # TODO: temporary, for MDACC
 if use_umcg:
     data_dir = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/PRI2MA/{}'
-    data_collection_dir = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/Users/Hooman Bahrdo/Deep_learning_datasets/Preprocessed_dataset1'
+    data_collection_dir = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/Users/Hooman Bahrdo/Deep_learning_datasets/Preprocessed_dataset2'
     data_dir_citor = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/PRI2MA/{}'  # Contains all 1453 CITOR RTSTRUCTs
-    save_dir_citor = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/Users/Hooman Bahrdo/Deep_learning_datasets/Preprocessed_dataset1/raw_rtstructs_citor'  # Contains CITOR RTSTRUCTs for our patients in our cohort
+    save_dir_citor = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/Users/Hooman Bahrdo/Deep_learning_datasets/Preprocessed_dataset2/raw_rtstructs_citor'  # Contains CITOR RTSTRUCTs for our patients in our cohort
     data_dir_dlc = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/OPC_data/ART Hooman/Hooman_project_data/DLC_baseline' # Correct DLCs  #'//zkh/appdata/RTDicom/Projectline_HNC_modelling/PRI2MA/DLC'  # Contains (valid) DLC RTSTRUCTs
-    save_root_dir = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/Users/Hooman Bahrdo/Deep_learning_datasets/Preprocessed_dataset1'  # Contains saved files from scripts such as processed data, loggings, etc.
-    save_root_dir_2 = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/Users/Hooman Bahrdo/Deep_learning_datasets/Preprocessed_dataset1/Second_root'  # Contains saved files for dataset
+    save_root_dir = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/Users/Hooman Bahrdo/Deep_learning_datasets/Preprocessed_dataset2'  # Contains saved files from scripts such as processed data, loggings, etc.
+    save_root_dir_2 = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/Users/Hooman Bahrdo/Deep_learning_datasets/Preprocessed_dataset2/Second_root'  # Contains saved files for dataset
     save_dir = os.path.join(save_root_dir_2, 'dicom_processed')
 else:
     data_dir = '//zkh/appdata/RTDicom/PRI2MA/MDACC/{}'
@@ -168,15 +168,19 @@ filename_main_logging_txt = 'main_logging.txt'
 # Hooman: Here I am adding some adjustmemnts base on my endpoint CSV file.
 patient_id_col =  'ID' #'PatientID'
 endpoint = 'xer_06' #'HN35_Xerostomia_M12_class'
-baseline_col = 'xer_bsl' #'HN35_Xerostomia_W01_class'
+baseline_col = 'xer_wk1' #'HN35_Xerostomia_W01_class'
 
-submodels_features =  None#[['xer_bsl', 'Parotid_Dmean']] # I do NOT have any submodel in my base model.
+submodels_features =  [
+    ['Submandibular_Dmean', 'xer_wk1_little', 'xer_wk1_moderate_to_severe'],
+    ['sqr_parotid_Dmean', 'xer_wk1_little', 'xer_wk1_moderate_to_severe'],
+]  #None#[['xer_bsl', 'Parotid_Dmean']] # I do NOT have any submodel in my base model.
     #[
     #['Submandibular_meandose', 'HN35_Xerostomia_W01_little', 'HN35_Xerostomia_W01_moderate_to_severe'],
     #['Parotid_meandose_adj', 'HN35_Xerostomia_W01_little', 'HN35_Xerostomia_W01_moderate_to_severe'],
 #]  # Features of submodels. Should be a list of lists. len(submodels_features) = nr_of_submodels. If None, then
 # no fitting of submodels.
-features =  ['xer_bsl', 'Parotid_Dmean'] #['Submandibular_meandose', 'Parotid_meandose_adj', 'HN35_Xerostomia_W01_little',
+features =  ['Submandibular_Dmean', 'sqr_parotid_Dmean', 'xer_wk1_little', 'xer_wk1_moderate_to_severe'] 
+            #['Submandibular_meandose', 'Parotid_meandose_adj', 'HN35_Xerostomia_W01_little',
             #'HN35_Xerostomia_W01_moderate_to_severe']  # Features of final model. Elements in submodels_features should
 # be a subset of `features`, i.e. submodels_features can have more distinct features than the final model.
 lr_coefficients = None  # [-2.9032, 0.0193, 0.1054, 0.5234, 1.2763]  # Values starting with coefficient for `intercept`,
@@ -313,4 +317,4 @@ filename_weeklyct_metadata_json = 'weeklyct_metadata.json'  # meta-data of the W
 filename_weeklyct_npy = 'weeklyct.npy'  # WeeklyCT (Numpy array)
 
 # Run whole data_preproc pipeline for a small number of patients, useful for testing
-test_patients_list = os.listdir(weeklyct_dir)  # None  # ['0276627'] ['0021879', '0052277']#
+test_patients_list = os.listdir(weeklyct_dir)  # None  # ['0020715', '1737477', '2078963', '2970220', '3015476', '8476506']
