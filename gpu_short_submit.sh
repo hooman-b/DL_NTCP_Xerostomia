@@ -20,8 +20,8 @@
 
 
 #module load Python/3.11.3-GCCcore-12.3.0
-#python3 -m venv /scratch/$USER/.envs/HNC_env
-#source /scratch/$USER/.envs/HNC_env/bin/activate
+#python3 -m venv /scratch/$USER/.envs/Xerostomia_env
+#source /scratch/$USER/.envs/Xerostomia_env/bin/activate
 
 #pip install --upgrade pip
 #pip3 install torch torchvision torchaudio
@@ -46,7 +46,7 @@ module load Python/3.11.3-GCCcore-12.3.0
 
 
 ## Activate local python environment
-source /scratch/$USER/.envs/HNC_env/bin/activate
+source /scratch/$USER/.envs/Xerostomia_env/bin/activate
 #pip install numpy --upgrade
 
 # Train
