@@ -3,7 +3,7 @@
 #SBATCH --job-name=Xerostomia_1
 #SBATCH --mail-type=END
 #SBATCH --mail-user=d.macrae@student.rug.nl
-#SBATCH --time=2:59:59
+#SBATCH --time=0:15:59
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:1
 #SBATCH --mem=64G
