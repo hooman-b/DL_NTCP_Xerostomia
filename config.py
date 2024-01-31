@@ -24,6 +24,7 @@ sys.path.append('./data_preproc')
 import math
 import torch
 from datetime import datetime
+from itertools import chain, combinations
 
 import data_preproc.data_preproc_config as data_preproc_config
 from data_preproc.data_preproc_functions import create_folder_if_not_exists
@@ -77,10 +78,10 @@ val_frac = 0.15  # training-internal_validation-test split. The same test set wi
 sampling_type = 'stratified'  # ['random', 'stratified']. Method for dataset splitting.
 perform_stratified_sampling_full = True  # (Stratified Sampling). Whether or not to recreate stratified_sampling_full.csv.
 # Note: if stratified_sampling_full.csv does not exist, then we will perform stratified sampling to create the file.
-strata_groups = ['xer_06']  #, 'Year_treatment_2cat']  # (Stratified Sampling). Note: order does not matter.
+strata_groups = ['xer_06']#,'xer_wk1', 'surface_bsl_dlc']#, 'Modality_adjusted', 'Loctum2']  #, 'Year_treatment_2cat']  # (Stratified Sampling). Note: order does not matter.
 split_col = 'Split'  # (Stratified Sampling). Column of the stratified sampling outcome ('train', 'val', 'test').
 cv_strata_groups = strata_groups  # (TODO: implement) Stratified Cross-Validation groups
-cv_folds = 3 # (Cross-Validation) If cv_folds=1, then perform train-val-test-split. (For testing, I put it equal to 1)
+cv_folds = 10 # (Cross-Validation) If cv_folds=1, then perform train-val-test-split. (For testing, I put it equal to 1)
 cv_type = 'stratified'  # (Stratified CV, only if cv_folds > 1) None | 'stratified'. Stratification is performed on endpoint value.
 dataset_type = 'cache'  # 'standard' | 'cache' | 'persistent'. If None, then 'standard'.
 # Cache: caches data in RAM storage. Persistent: caches data in disk storage instead of RAM storage.
@@ -154,7 +155,7 @@ mixture_depth = [1, 3]  # [1, 3] (default)
 augmix_strength = 3
 
 # Deep Learning model config
-model_name = 'resnet_dcnn_lrelu'  # ['cnn_lrelu', 'convnext_tiny', 'convnext_small', 'convnext_base',
+model_name = 'resnet_lrelu'  # ['cnn_lrelu', 'convnext_tiny', 'convnext_small', 'convnext_base',
 # 'dcnn_lrelu', 'dcnn_dws_lrelu', 'dcnn_lrelu_gn', 'dcnn_lrelu_ln', 'dcnn_selu', 'efficientnet-b0', 'efficientnet-b1',
 # ..., 'efficientnet-b8', 'efficientnetv2_xs', 'efficientnetv2_s', 'efficientnetv2_m', 'efficientnetv2_l',
 # 'efficientnetv2_xl', 'efficientnetv2_s_selu', 'efficientnetv2_m_selu', 'efficientnetv2_l_selu',
@@ -162,7 +163,8 @@ model_name = 'resnet_dcnn_lrelu'  # ['cnn_lrelu', 'convnext_tiny', 'convnext_sma
 # 'resnet_dcnn_dws_lrelu_v2, 'resnet_dcnn_lrelu_gn',
 # 'resnet_dcnn_selu', 'resnet_mp_lrelu', 'resnet_original_relu', 'resnext_lrelu', 'resnext_original_relu'].
 n_input_channels = 3  # CT, RTDOSE and Segmentation_map
-features_dl = ['xer_bsl', 'Parotid_Dmean']#['HN35_Xerostomia_W01_not_at_all', 'HN35_Xerostomia_W01_little', 'HN35_Xerostomia_W01_moderate_to_severe',
+features_dl = ['xer_wk1_not_at_all', 'xer_wk1_little', 'xer_wk1_moderate_to_severe', 'sex', 'age']
+              #['HN35_Xerostomia_W01_not_at_all', 'HN35_Xerostomia_W01_little', 'HN35_Xerostomia_W01_moderate_to_severe',
               # 'Gender', 'Age']  # [] | data_preproc_config.features  # Should contain columns in features.csv.
 resnet_shortcut = 'B'  # (resnet_original) 'A', 'B'. Pretrained resnet10_original has 'B', resnet18_original has 'A'.
 filters = [8, 8, 16, 16, 32]#[6, 12, 24, 48, 96]#
@@ -209,7 +211,7 @@ use_lookahead = False  # (Lookahead)
 lookahead_k = 5  # (Lookahead) 5 (default), 10.
 lookahead_alpha = 0.5  # (Lookahead) 0.5 (default), 0.8.
 loss_function_name = 'cross_entropy'  # [None, 'bce' (num_classes = 1), 'cross_entropy' (num_classes = 2), 'cross_entropy', # Ask for costume
-# 'dice', 'f1', 'ranking', 'soft_auc', 'custom']. Note: if 'bce', then also change label_weights to list of 1 element.
+# 'dice', 'f1', 'ranking', 'soft_auc', 'custom']. Note: if 'bce', then also change label_weights to list of 1 element. # use costum again
 # Note: model output should be logits, i.e. NO sigmoid() (BCE) nor softmax() (CE) applied.
 loss_weights = [1, 0, 1, 1, 0, 0]  # [1/6, 1/6, 1/6, 1/6, 1/6, 1/6].
 # (loss_function_name='custom') list of weight for [ce, dice, f1, l1, ranking, soft_auc].
@@ -283,11 +285,21 @@ optuna_filters_list = [[16, 16, 32, 32, 64], [8, 8, 16, 32, 64], [16, 16, 32, 64
 optuna_min_kernel_size = 3
 optuna_max_kernel_size = 7
 optuna_linear_units_size = [1, 2, 3]
-optuna_clinical_variables_linear_units_size = [1, 2] #, 3]
+optuna_clinical_variables_linear_units_size = [1, 2, 3]
 optuna_linear_units_list = [8, 16, 32, 64]
 optuna_clinical_variables_linear_units_list = [8, 16, 32, 64]
-optuna_features_dl_list = ['xer_bsl', 'Parotid_Dmean'] 
-# optuna_features_dl_list = [['LEEFTIJD','Smoking_Active','T1','T2','T3','T4','N1','N2','N3','Larynx','Oropharynx','Hypopharynx','OralCavity','Nasopharynx','Chemo',
-# 'Taste_W01','Xer_W01_Little','Xer_W01_Quite','Xer_W01_Very','Dys_W01'],['LEEFTIJD','Smoking_Active','T1','T2','T3','T4','N1','N2','N3','Larynx','Oropharynx','Hypopharynx','OralCavity','Nasopharynx','Chemo'],
-# ['Taste_W01','Xer_W01_Little','Xer_W01_Quite','Xer_W01_Very','Dys_W01'],['LEEFTIJD']]
 T0 = [10,20,30,40]
+
+
+def make_clinical_features(features):
+    # Make all the possible combination of the elements
+    result_list = [list(combination) for r in range(1, len(features) + 1)
+                for combination in combinations(features, r)]
+
+    # Adding the empty sublist
+    result_list.insert(0, [])
+    return result_list
+
+
+optuna_features_dl_list = make_clinical_features(['xer_wk1_not_at_all', 'xer_wk1_little', 
+                                                  'xer_wk1_moderate_to_severe', 'sex', 'age'])
