@@ -30,8 +30,7 @@
 #pip3 install scikit-learn opencv-python
 #pip3 install timm
 #pip3 install pandas
-
-pip3 install torchinfo
+#pip3 install torchinfo
 
 # Run
 module purge
@@ -48,6 +47,9 @@ module load Python/3.11.3-GCCcore-12.3.0
 ## Activate local python environment
 source /scratch/$USER/.envs/Xerostomia_env/bin/activate
 #pip install numpy --upgrade
+
+export TORCH_LOGS="+dynamo"
+export TORCHDYNAMO_VERBOSE=1
 
 # Train
 python3 -u main.py
