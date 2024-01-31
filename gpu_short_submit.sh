@@ -31,7 +31,7 @@
 #pip3 install timm
 #pip3 install pandas
 
-
+pip3 install torchinfo
 
 # Run
 module purge
