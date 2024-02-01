@@ -51,7 +51,7 @@ source /scratch/$USER/.envs/Xerostomia_env/bin/activate
 #export TORCH_LOGS="+dynamo"
 #export TORCHDYNAMO_VERBOSE=1
 
-ulimit -n 4096
+ulimit -n 8192
 
 # Train
 python3 -u main.py
