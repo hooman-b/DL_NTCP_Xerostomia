@@ -290,7 +290,7 @@ def train(model, train_dataloader, val_dataloader, test_dataloader, mean, std, o
                                                           rtdose_mean=mean[1], rtdose_std=std[1])
             train_features = process_data.preprocess_features(features=train_features)
 
-            print('hiiiiiiiiiiiiiiiiiii', train_features)
+            # print('hiiiiiiiiiiiiiiiiiii', train_features)
             # train_inputs = train_inputs.to(torch.long)
             # train_features = train_features.to(torch.long)
 
@@ -847,7 +847,7 @@ def optuna_objective(trial):
         else:
             train_dict, val_dict, test_dict = [None] * 3
         
-        print('hiiiiiiiiiiiiiiiiiiiiiii', features_dl)
+        # print('hiiiiiiiiiiiiiiiiiiiiiii', features_dl)
         (train_dl, val_dl, test_dl, train_ds, dl_class, train_dl_args_dict, batch_size, channels,
         depth, height, width, n_train_0, n_train_1, n_val_0, n_val_1, n_test_0, n_test_1,
         n_features, train_dict, val_dict, test_dict, norm_mean, norm_std) = \
@@ -868,7 +868,7 @@ def optuna_objective(trial):
         norm_std_dict[fold] = norm_std
 
         # Initialize model
-        print('hiiiiiiiiiiiiiiiiiiii', n_features)
+        # print('hiiiiiiiiiiiiiiiiiiii', n_features)
         model = misc.get_model(model_name=model_name, num_ohe_classes=num_ohe_classes, channels=channels,
                             depth=depth, height=height, width=width, n_features=n_features,
                             resnet_shortcut=resnet_shortcut,
