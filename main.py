@@ -882,9 +882,9 @@ def optuna_objective(trial):
                             use_bias=use_bias, pretrained_path=pretrained_path_i, logger=logger)
         model.to(device=device)
 
-        # Compile model (PyTorch 2)
-        if torch_version.startswith('2.'):
-            model = torch.compile(model)
+        # Compile model (PyTorch 2) to get rid of
+        # if torch_version.startswith('2.'):
+        #     model = torch.compile(model)
 
         # Weight initialization
         if 'selu' in model_name:

@@ -163,7 +163,7 @@ def get_files(sampling_type, features, filename_stratified_sampling_test_csv, fi
         # features_list += [[float(str(x).replace(',', '.')) for x in y] for y in
         #                   df_features_i[features].values.tolist()]
         # Endpoint
-        labels_list.append(int(df_features_i[data_preproc_config.endpoint]))
+        labels_list.append(int(df_features_i[data_preproc_config.endpoint])) # check this on Daniel bran to silent the warning.
 
     assert len(patient_ids_list) == len(features_list) == len(labels_list)
     # Note: '0' in front of string is okay: int('0123') will become 123
