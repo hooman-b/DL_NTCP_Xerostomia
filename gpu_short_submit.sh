@@ -52,7 +52,7 @@ source /scratch/$USER/.envs/Xerostomia_env/bin/activate
 #export TORCHDYNAMO_VERBOSE=1
 
 # Increase the file descriptor limit
-ulimit -n 16384
+ulimit -n 60000
 ulimit -n -H
 ulimit -n -S
 
