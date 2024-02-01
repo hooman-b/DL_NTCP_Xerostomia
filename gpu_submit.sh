@@ -49,6 +49,11 @@ module load Python/3.11.3-GCCcore-12.3.0
 source /scratch/$USER/.envs/Xerostomia_env/bin/activate
 #pip install numpy --upgrade
 
+# Increase the file descriptor limit
+ulimit -n 60000
+ulimit -n -H
+ulimit -n -S
+
 # Train
 python3 -u main.py
 
