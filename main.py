@@ -41,6 +41,12 @@ from data_preproc.data_preproc_functions import copy_file, copy_folder, create_f
 from data_preproc.checks.check_data_preproc import plot_multiple_arrs
 from models.logistic_regression import run_logistic_regression
 
+# Handle increase the file descriptor error
+import torch.multiprocessing as mp
+
+# Change the multiprocessing strategy to 'file_system'
+mp.set_sharing_strategy('file_system')
+
 
 def initialize(torch_version, device, create_folders=True):
     """
