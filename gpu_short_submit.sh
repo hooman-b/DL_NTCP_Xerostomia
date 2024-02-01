@@ -51,7 +51,10 @@ source /scratch/$USER/.envs/Xerostomia_env/bin/activate
 #export TORCH_LOGS="+dynamo"
 #export TORCHDYNAMO_VERBOSE=1
 
-ulimit -n 8192
+# Increase the file descriptor limit
+ulimit -n 16384
+ulimit -n -H
+ulimit -n -S
 
 # Train
 python3 -u main.py
