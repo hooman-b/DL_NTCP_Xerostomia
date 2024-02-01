@@ -86,7 +86,7 @@ cv_type = 'stratified'  # (Stratified CV, only if cv_folds > 1) None | 'stratifi
 dataset_type = 'cache'  # 'standard' | 'cache' | 'persistent'. If None, then 'standard'.
 # Cache: caches data in RAM storage. Persistent: caches data in disk storage instead of RAM storage.
 cache_rate = 1.0  # (dataset_type='cache')
-num_workers = 4  # `4 * num_GPUs` (dataset_type='cache') # 8 or ten will be faster
+num_workers = 16  # `4 * num_GPUs` (dataset_type='cache') # 8 or ten will be faster
 pin_memory = True if num_workers > 0 else False  # Do not change
 to_device = False  # if num_workers > 0 else True  # Whether or not to apply `ToDeviced()` in Dataset' transforms.
 # See load_data.py. Suggestion: set True on HPC, set False on local computer.
