@@ -68,7 +68,7 @@ nr_of_decimals = 3
 # Decide which device we want to run on
 gpu_condition = torch.cuda.is_available()
 device = torch.device('cuda') if gpu_condition else torch.device('cpu')
-cudnn_benchmark = False  # True if gpu_condition else False  # `True` will be faster, but potentially at cost of reproducibility
+cudnn_benchmark = True  # True if gpu_condition else False  # `True` will be faster, but potentially at cost of reproducibility
 # This flag allows us to enable the inbuilt CuDNN auto-tuner to find the best algorithm to use for our hardware. 
 # Only enable if input sizes of our network do not vary. ####### Ask about this one.
 
@@ -301,5 +301,5 @@ def make_clinical_features(features):
     return result_list
 
 
-optuna_features_dl_list = [[] , ['xer_wk1_not_at_all', 'xer_wk1_little', 'xer_wk1_moderate_to_severe', 'sex', 'age']]
+optuna_features_dl_list = [[]] #[[] , ['xer_wk1_not_at_all', 'xer_wk1_little', 'xer_wk1_moderate_to_severe', 'sex', 'age']]
 print(optuna_features_dl_list)
