@@ -275,7 +275,7 @@ def train(model, train_dataloader, val_dataloader, test_dataloader, mean, std, o
                 batch_data['features'].to(device),
                 batch_data['label'].to(device)
             )
-            print(batch_data['ID'])
+            print(batch_data['patient_id'])
             if perform_augmix:
                 for b in range(len(train_inputs)):
                     # Generate a random 32-bit integer
