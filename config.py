@@ -30,7 +30,7 @@ import data_preproc.data_preproc_config as data_preproc_config
 from data_preproc.data_preproc_functions import create_folder_if_not_exists
 
 # Whether to perform quick run for checking workability of code or not
-perform_test_run = False # This one is used for testing purposes.
+perform_test_run = True # This one is used for testing purposes.
 
 # Set directory contexts
 root_path = os.getcwd()#'//zkh/appdata/RTDicom/Projectline_HNC_modelling/Users/Hooman Bahrdo/Deep_learning_datasets/Preprocessed_dataset1' #os.getcwd()
@@ -155,7 +155,7 @@ mixture_depth = [1, 3]  # [1, 3] (default)
 augmix_strength = 3
 
 # Deep Learning model config
-model_name = 'resnet_lrelu'  # ['cnn_lrelu', 'convnext_tiny', 'convnext_small', 'convnext_base',
+model_name = 'dcnn_lrelu'  # ['cnn_lrelu', 'convnext_tiny', 'convnext_small', 'convnext_base',
 # 'dcnn_lrelu', 'dcnn_dws_lrelu', 'dcnn_lrelu_gn', 'dcnn_lrelu_ln', 'dcnn_selu', 'efficientnet-b0', 'efficientnet-b1',
 # ..., 'efficientnet-b8', 'efficientnetv2_xs', 'efficientnetv2_s', 'efficientnetv2_m', 'efficientnetv2_l',
 # 'efficientnetv2_xl', 'efficientnetv2_s_selu', 'efficientnetv2_m_selu', 'efficientnetv2_l_selu',
@@ -264,10 +264,10 @@ if perform_test_run:
     lr_finder_num_iter = 0
     n_samples = 40
     nr_runs = 1
-    max_epochs = 2
+    max_epochs = 1
     train_frac = 0.6 # What???!!!Why???!!!
     val_frac = 0.2
-    cv_folds = 1
+    cv_folds = 2
     batch_size = 3
     num_workers = 0
     pin_memory = False
@@ -303,3 +303,4 @@ def make_clinical_features(features):
 
 optuna_features_dl_list = make_clinical_features(['xer_wk1_not_at_all', 'xer_wk1_little', 
                                                   'xer_wk1_moderate_to_severe', 'sex', 'age'])
+print(optuna_features_dl_list)
