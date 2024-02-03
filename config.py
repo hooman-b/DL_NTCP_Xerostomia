@@ -30,7 +30,7 @@ import data_preproc.data_preproc_config as data_preproc_config
 from data_preproc.data_preproc_functions import create_folder_if_not_exists
 
 # Whether to perform quick run for checking workability of code or not
-perform_test_run = True # This one is used for testing purposes.
+perform_test_run = False # This one is used for testing purposes.
 
 # Set directory contexts
 root_path = os.getcwd()#'//zkh/appdata/RTDicom/Projectline_HNC_modelling/Users/Hooman Bahrdo/Deep_learning_datasets/Preprocessed_dataset1' #os.getcwd()
