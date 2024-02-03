@@ -301,5 +301,5 @@ def make_clinical_features(features):
     return result_list
 
 
-optuna_features_dl_list = [[['xer_wk1_not_at_all', 'xer_wk1_little', 'xer_wk1_moderate_to_severe', 'sex', 'age']]] #[[] , ['xer_wk1_not_at_all', 'xer_wk1_little', 'xer_wk1_moderate_to_severe', 'sex', 'age']]
+optuna_features_dl_list = [['xer_wk1_not_at_all', 'xer_wk1_little', 'xer_wk1_moderate_to_severe', 'sex', 'age']] #[[] , ['xer_wk1_not_at_all', 'xer_wk1_little', 'xer_wk1_moderate_to_severe', 'sex', 'age']]
 print(optuna_features_dl_list)
