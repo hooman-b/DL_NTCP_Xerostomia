@@ -13,12 +13,12 @@ use_umcg = True
 # TODO: temporary, for MDACC
 if use_umcg:
     data_dir = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/PRI2MA/{}'
-    data_collection_dir = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/Users/Hooman Bahrdo/Deep_learning_datasets/Preprocessed_dataset3'
+    data_collection_dir = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/Users/Hooman Bahrdo/Deep_learning_datasets/Preprocessed_dataset4'
     data_dir_citor = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/PRI2MA/{}'  # Contains all 1453 CITOR RTSTRUCTs
-    save_dir_citor = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/Users/Hooman Bahrdo/Deep_learning_datasets/Preprocessed_dataset3/raw_rtstructs_citor'  # Contains CITOR RTSTRUCTs for our patients in our cohort
+    save_dir_citor = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/Users/Hooman Bahrdo/Deep_learning_datasets/Preprocessed_dataset4/raw_rtstructs_citor'  # Contains CITOR RTSTRUCTs for our patients in our cohort
     data_dir_dlc = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/OPC_data/ART Hooman/Hooman_project_data/DLC_baseline' # Correct DLCs  #'//zkh/appdata/RTDicom/Projectline_HNC_modelling/PRI2MA/DLC'  # Contains (valid) DLC RTSTRUCTs
-    save_root_dir = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/Users/Hooman Bahrdo/Deep_learning_datasets/Preprocessed_dataset3'  # Contains saved files from scripts such as processed data, loggings, etc.
-    save_root_dir_2 = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/Users/Hooman Bahrdo/Deep_learning_datasets/Preprocessed_dataset3/Second_root'  # Contains saved files for dataset
+    save_root_dir = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/Users/Hooman Bahrdo/Deep_learning_datasets/Preprocessed_dataset4'  # Contains saved files from scripts such as processed data, loggings, etc.
+    save_root_dir_2 = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/Users/Hooman Bahrdo/Deep_learning_datasets/Preprocessed_dataset4/Second_root'  # Contains saved files for dataset
     save_dir = os.path.join(save_root_dir_2, 'dicom_processed')
 else:
     data_dir = '//zkh/appdata/RTDicom/PRI2MA/MDACC/{}'
@@ -167,7 +167,7 @@ filename_main_logging_txt = 'main_logging.txt'
 # data_preproc.py: filename_endpoints_csv
 # Hooman: Here I am adding some adjustmemnts base on my endpoint CSV file.
 patient_id_col =  'ID' #'PatientID'
-endpoint = 'xer_06' #'HN35_Xerostomia_M12_class'
+endpoint = 'xer_12' #'HN35_Xerostomia_M12_class'
 baseline_col = 'xer_wk1' #'HN35_Xerostomia_W01_class'
 
 submodels_features =  [
@@ -317,4 +317,9 @@ filename_weeklyct_metadata_json = 'weeklyct_metadata.json'  # meta-data of the W
 filename_weeklyct_npy = 'weeklyct.npy'  # WeeklyCT (Numpy array)
 
 # Run whole data_preproc pipeline for a small number of patients, useful for testing
-test_patients_list = None# ['1318845'] # os.listdir(weeklyct_dir)  # None  # ['0020715', '1737477', '2078963', '2970220', '3015476', '8476506']
+test_patients_list = None
+# ['0079378','0303865','0401057','0517608','0563941','0765200',
+#  '1097433','1320820','1434975','1437642','1869667','2000655','2004292','2083033',
+#  '2162043','2163243','2202380','2209518','2566716','3000261','3453949','4693746',
+#  '5883571','5896858','6469382','7175193','8667722','9403901']
+# ['1318845'] # os.listdir(weeklyct_dir)  # None  # ['0020715', '1737477', '2078963', '2970220', '3015476', '8476506']

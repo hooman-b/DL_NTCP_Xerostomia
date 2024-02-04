@@ -78,7 +78,7 @@ val_frac = 0.15  # training-internal_validation-test split. The same test set wi
 sampling_type = 'stratified'  # ['random', 'stratified']. Method for dataset splitting.
 perform_stratified_sampling_full = True  # (Stratified Sampling). Whether or not to recreate stratified_sampling_full.csv.
 # Note: if stratified_sampling_full.csv does not exist, then we will perform stratified sampling to create the file.
-strata_groups = ['xer_06']#,'xer_wk1', 'surface_bsl_dlc']#, 'Modality_adjusted', 'Loctum2']  #, 'Year_treatment_2cat']  # (Stratified Sampling). Note: order does not matter.
+strata_groups = ['xer_12']#,'xer_wk1', 'surface_bsl_dlc']#, 'Modality_adjusted', 'Loctum2']  #, 'Year_treatment_2cat']  # (Stratified Sampling). Note: order does not matter.
 split_col = 'Split'  # (Stratified Sampling). Column of the stratified sampling outcome ('train', 'val', 'test').
 cv_strata_groups = strata_groups  # (TODO: implement) Stratified Cross-Validation groups
 cv_folds = 5 # (Cross-Validation) If cv_folds=1, then perform train-val-test-split. (For testing, I put it equal to 1)
