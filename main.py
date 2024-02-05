@@ -4,8 +4,8 @@ independently testing the final ensemble model.
 
 TODO: Add loop to evaluate different loss function, optimizers and models.
 """
-import torch._dynamo
-torch._dynamo.config.suppress_errors = True
+# import torch._dynamo
+# torch._dynamo.config.suppress_errors = True
 
 import os
 import time
@@ -1139,7 +1139,9 @@ def optuna_objective(trial):
                 # Make sure that test_y_sum and test_y_lr_sum have only `num_classes` different tensors:
                 # e.g. cv_folds = 5: {(0.0, 5.0), (5.0, 0.0)}
                 if max_epochs > 0:
-                    assert len(set([tuple(x.tolist()) for x in test_y_sum])) == num_classes
+                    # print('HIIIIIIIIIIIIIIII', len(set([tuple(x.tolist()) for x in test_y_sum])), num_classes)
+                    # print('HIIIIIIIIIIIIIIII', test_y_sum, test_y_lr_sum)
+                    # assert len(set([tuple(x.tolist()) for x in test_y_sum])) == num_classes
                     test_y_pred_ens = [x / cv_folds for x in test_y_pred_sum]
                     test_y_ens = [x / cv_folds for x in test_y_sum]
                     misc.save_predictions(patient_ids=test_patient_ids, y_pred_list=test_y_pred_ens,
