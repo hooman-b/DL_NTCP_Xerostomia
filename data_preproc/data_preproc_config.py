@@ -167,7 +167,7 @@ filename_main_logging_txt = 'main_logging.txt'
 # data_preproc.py: filename_endpoints_csv
 # Hooman: Here I am adding some adjustmemnts base on my endpoint CSV file.
 patient_id_col =  'ID' #'PatientID'
-endpoint = 'xer_12' #'HN35_Xerostomia_M12_class'
+endpoint = 'xer_06' #'HN35_Xerostomia_M12_class'
 baseline_col = 'xer_wk1' #'HN35_Xerostomia_W01_class'
 
 submodels_features =  [
@@ -317,7 +317,9 @@ filename_weeklyct_metadata_json = 'weeklyct_metadata.json'  # meta-data of the W
 filename_weeklyct_npy = 'weeklyct.npy'  # WeeklyCT (Numpy array)
 weeklycd_cmap = 'gray'
 weeklyct_colorbar_title = 'HU'
-
+first_array_sub = filename_ct_npy
+second_array_sub = filename_weeklyct_npy
+filename_subtractionct = 'subctionct.npy'
 # Run whole data_preproc pipeline for a small number of patients, useful for testing
 test_patients_list = None
 # ['0079378','0303865','0401057','0517608','0563941','0765200',

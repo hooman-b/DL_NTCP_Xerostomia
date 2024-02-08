@@ -226,6 +226,8 @@ def get_files(sampling_type, features, filename_stratified_sampling_test_csv, fi
                              int(x) not in exclude_patients and x in df_split[patient_id_col].tolist()]
             for p in patient_ids_l:
                 df_i = df_split[df_split[patient_id_col] == p]
+                # print(df_i)
+                # print(labels_unique, l, int(df_i[data_preproc_config.endpoint].values[0]), int(l))
                 assert int(df_i[data_preproc_config.endpoint].values[0]) == int(l)
 
         # Split

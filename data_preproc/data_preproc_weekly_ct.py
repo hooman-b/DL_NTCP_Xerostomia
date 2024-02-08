@@ -303,10 +303,35 @@ def preprocess_weeklyct_dataset():
     logger.my_print('Elapsed time: {time} seconds'.format(time=round(end - start, 3)))
     logger.my_print('DONE!')            
 
+def calculate_ct_substraction():
+    save_dir_dataset = cfg.save_dir_dataset
+    first_array_sub = cfg.first_array_sub
+    second_array_sub = cfg.second_array_sub
+    filename_subtractionct = cfg.filename_subtractionct
+
+    for r, d, f in os.walk(save_dir_dataset):
+        # make a list from all the directories 
+        subfolders = [os.path.join(r, folder) for folder in d]
+
+        try:
+            for subf in subfolders:
+                dir_list = os.listdir(subf)
+                
+                if 'np' in dir_list[0].lower():
+                    first_npy = np.load(os.path.join(subf, first_array_sub))
+                    second_npy = np.load(os.path.join(subf, second_array_sub))
+                    subtraction_npy = first_npy - second_npy
+                    np.save(file=os.path.join(subf, filename_subtractionct), arr=subtraction_npy)
+        
+        except Exception as e:
+            print(e)
+            pass        
+
 def main():
     save_ct_arr()
     preprocess_weeklyct_array()
     preprocess_weeklyct_dataset()
+    # calculate_ct_substraction() Is used if wants the subtraction ct
 
 if __name__ == '__main__':
     main()
