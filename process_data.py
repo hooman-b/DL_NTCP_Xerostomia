@@ -51,16 +51,17 @@ def preprocess_inputs(inputs, ct_mean, ct_std, rtdose_mean, rtdose_std):
     #                     a_min=config.segmentation_map_a_min, a_max=config.segmentation_map_a_max,
     #                     b_min=config.segmentation_map_b_min, b_max=config.segmentation_map_b_max,
     #                     clip=config.segmentation_map_clip),
-    weeklyct_scaler = ScaleIntensityRange(a_min=config.weeklyct_a_min, a_max=config.weeklyct_a_max,
-                                            b_min=config.weeklyct_b_min, b_max=config.weeklyct_b_max,
-                                            clip=config.weeklyct_clip)
+    # weeklyct_scaler = ScaleIntensityRange(a_min=config.weeklyct_a_min, a_max=config.weeklyct_a_max,
+    #                                         b_min=config.weeklyct_b_min, b_max=config.weeklyct_b_max,
+    #                                         clip=config.weeklyct_clip)
+
     # # Normalization
     # ct_scaler = NormalizeIntensity(subtrahend=ct_mean, divisor=ct_std)
     # rtdose_scaler = NormalizeIntensity(subtrahend=rtdose_mean, divisor=rtdose_std)
 
     inputs[:, 0, ...] = ct_scaler(inputs[:, 0, ...])
     inputs[:, 1, ...] = rtdose_scaler(inputs[:, 1, ...])
-    inputs[:, 2, ...] = weeklyct_scaler(inputs[:, 2, ...])
+    # inputs[:, 2, ...] = weeklyct_scaler(inputs[:, 2, ...])
 
     # # Apply sigmoid to map to [0, 1]
     # sigmoid_act = torch.nn.Sigmoid()
@@ -224,12 +225,12 @@ def aug_mix(arr, mixture_width, mixture_depth, augmix_strength, device, seed):
             image_aug[1] = op(arr=image_aug[1], mode=config.rtdose_interpol_mode_2d, strength=augmix_strength,
                               seed=seed_i)
             # ############# Changing for WeeklyCTs #############
-            # # Segmentation
-            # image_aug[2] = op(arr=image_aug[2], mode=config.segmentation_interpol_mode_2d, strength=augmix_strength,
-            #                   seed=seed_i)
+            # Segmentation
+            image_aug[2] = op(arr=image_aug[2], mode=config.segmentation_interpol_mode_2d, strength=augmix_strength,
+                              seed=seed_i)
 
-            # WeeklyCT
-            image_aug[2] = op(arr=image_aug[2], mode=config.weeklyct_interpol_mode_2d, strength=augmix_strength, seed=seed_i)
+            # # WeeklyCT
+            # image_aug[2] = op(arr=image_aug[2], mode=config.weeklyct_interpol_mode_2d, strength=augmix_strength, seed=seed_i)
 
         # Preprocessing commutes since all coefficients are convex
         mix += ws[i] * image_aug

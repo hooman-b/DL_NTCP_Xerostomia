@@ -437,29 +437,29 @@ def train(model, train_dataloader, val_dataloader, test_dataloader, mean, std, o
                             plot_inputs[patient_idx][2].cpu()]
                 
                 # ########### some changes in the output ###########
-                # cmap_list = [data_preproc_config.ct_cmap, data_preproc_config.rtdose_cmap,
-                #              data_preproc_config.segmentation_cmap]
                 cmap_list = [data_preproc_config.ct_cmap, data_preproc_config.rtdose_cmap,
-                              data_preproc_config.weeklycd_cmap]
+                             data_preproc_config.segmentation_cmap]
+                # cmap_list = [data_preproc_config.ct_cmap, data_preproc_config.rtdose_cmap,
+                #               data_preproc_config.weeklycd_cmap]
             
                 # vmin_list = [0, 0, 0]
-                # vmin_list = [config.ct_a_min, config.rtdose_a_min, 0]
-                vmin_list = [config.ct_a_min, config.rtdose_a_min, config.weeklyct_a_min]
+                vmin_list = [config.ct_a_min, config.rtdose_a_min, 0]
+                # vmin_list = [config.ct_a_min, config.rtdose_a_min, config.weeklyct_a_min]
 
                 # vmax_list = [1, config.data_preproc_config.rtdose_vmax/config.rtdose_a_max, 1]
-                # vmax_list = [config.ct_a_max, config.data_preproc_config.rtdose_vmax, 1]
-                vmax_list = [config.ct_a_max, config.data_preproc_config.rtdose_vmax, config.weeklyct_a_max]
+                vmax_list = [config.ct_a_max, config.data_preproc_config.rtdose_vmax, 1]
+                # vmax_list = [config.ct_a_max, config.data_preproc_config.rtdose_vmax, config.weeklyct_a_max]
 
-                # ticks_steps_list = [vmax_list[0] - vmin_list[0], vmax_list[1] - vmin_list[1], 1]
-                ticks_steps_list = [vmax_list[0] - vmin_list[0], vmax_list[1] - vmin_list[1], vmax_list[2] - vmin_list[2]]
+                ticks_steps_list = [vmax_list[0] - vmin_list[0], vmax_list[1] - vmin_list[1], 1]
+                # ticks_steps_list = [vmax_list[0] - vmin_list[0], vmax_list[1] - vmin_list[1], vmax_list[2] - vmin_list[2]]
 
-                # segmentation_map_list = [arr_list[2] >= 0.5, None, None]
-                segmentation_map_list = None
+                segmentation_map_list = [arr_list[2] >= 0.5, None, None]
+                # segmentation_map_list = None
 
-                # colorbar_title_list = [data_preproc_config.ct_colorbar_title, data_preproc_config.rtdose_colorbar_title,
-                #                        data_preproc_config.segmentation_colorbar_title]
                 colorbar_title_list = [data_preproc_config.ct_colorbar_title, data_preproc_config.rtdose_colorbar_title,
-                                       data_preproc_config.weeklyct_colorbar_title]
+                                       data_preproc_config.segmentation_colorbar_title]
+                # colorbar_title_list = [data_preproc_config.ct_colorbar_title, data_preproc_config.rtdose_colorbar_title,
+                #                        data_preproc_config.weeklyct_colorbar_title]
 
                 # Overlay
                 overlay_list = [None, None, None]

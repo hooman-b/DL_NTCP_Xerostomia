@@ -101,7 +101,7 @@ segmentation_structures = data_preproc_config.structures_uncompound_list
 # only parotid and submandibulars. We can consider multiple list of structures by adding them using the '+' operator.
 
 # Data preprocessing config: load_data.py
-image_keys = ['ct', 'rtdose', 'weeklyct']  # Do not change
+image_keys = ['ct', 'rtdose', 'segmentation_map']  # Do not change
 concat_key = 'ct_dose_seg'  # Do not change
 perform_data_aug = True
 rand_cropping_size = [96, 96, 96]  # (REDUNDANT)  # OLD [100, 100, 100]  # (only for training data)
