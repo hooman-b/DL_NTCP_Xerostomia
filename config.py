@@ -101,7 +101,7 @@ segmentation_structures = data_preproc_config.structures_uncompound_list
 # only parotid and submandibulars. We can consider multiple list of structures by adding them using the '+' operator.
 
 # Data preprocessing config: load_data.py
-image_keys = ['ct', 'rtdose', 'segmentation_map']  # Do not change
+image_keys = ['subtractionct', 'rtdose', 'segmentation_map']  # Do not change
 concat_key = 'ct_dose_seg'  # Do not change
 perform_data_aug = True
 rand_cropping_size = [96, 96, 96]  # (REDUNDANT)  # OLD [100, 100, 100]  # (only for training data)
@@ -156,7 +156,7 @@ mixture_depth = [1, 3]  # [1, 3] (default)
 augmix_strength = 3
 
 # Deep Learning model config
-model_name = 'efficientnetv2_l_selu'  # ['cnn_lrelu', 'convnext_tiny', 'convnext_small', 'convnext_base',
+model_name = 'dcnn_lrelu'  # ['cnn_lrelu', 'convnext_tiny', 'convnext_small', 'convnext_base',
 # 'dcnn_lrelu', 'dcnn_dws_lrelu', 'dcnn_lrelu_gn', 'dcnn_lrelu_ln', 'dcnn_selu', 'efficientnet-b0', 'efficientnet-b1',
 # ..., 'efficientnet-b8', 'efficientnetv2_xs', 'efficientnetv2_s', 'efficientnetv2_m', 'efficientnetv2_l',
 # 'efficientnetv2_xl', 'efficientnetv2_s_selu', 'efficientnetv2_m_selu', 'efficientnetv2_l_selu',
@@ -326,6 +326,17 @@ print(optuna_features_dl_list)
 # Line 440 main
 # Change some ioutputs in the result part. instead of using segmentation maps,
 # I am using information for weeklyCTs.
+
+# Changes for subtraction model
+# Line 537 load_data:
+# Here I change 'ct.npy' to 'subtractionct.npy'
+#
+# Line 173 load_data:
+# change 'ct' into 'subtractionct' label and also change the direction.
+#
+# Line 104 in config
+# change the key image
+
 
 
 # WEEKLYCT PARAMETERS

@@ -167,8 +167,9 @@ def get_files(sampling_type, features, filename_stratified_sampling_test_csv, fi
 
     assert len(patient_ids_list) == len(features_list) == len(labels_list)
     # Note: '0' in front of string is okay: int('0123') will become 123
-    data_dicts = [ # Some changes here chane segmentation map to weeklyCTs
-        {'ct': os.path.join(data_dir, str(label_name), patient_id, data_preproc_config.filename_ct_npy),
+    data_dicts = [ # Some changes here chane segmentation map to weeklyCTs (ALSO, THIS PART SHOULD BE CHANGED FOR SUBTRACTIONCT)
+        {#'ct': os.path.join(data_dir, str(label_name), patient_id, data_preproc_config.filename_ct_npy),
+         'subtractionct': os.path.join(data_dir, str(label_name), patient_id, data_preproc_config.filename_subtractionct),   
          'rtdose': os.path.join(data_dir, str(label_name), patient_id, data_preproc_config.filename_rtdose_npy),
 
         ######## Here I made some changes ########### 
@@ -532,7 +533,8 @@ concat_key
         LoadImaged(keys=image_keys),
         EnsureTyped(keys=image_keys + ['features', 'label'], data_type='tensor'),
         # Clip  ############# This part should be changed #############
-        ScaleIntensityRanged(keys=['ct'],
+        # I am changing this part also for subtractionCTs
+        ScaleIntensityRanged(keys=['subtractionct'],
                              a_min=config.ct_a_min, a_max=config.ct_a_max,
                              b_min=config.ct_a_min, b_max=config.ct_a_max,
                              clip=config.ct_clip),

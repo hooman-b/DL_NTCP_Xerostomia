@@ -319,7 +319,10 @@ weeklycd_cmap = 'gray'
 weeklyct_colorbar_title = 'HU'
 first_array_sub = filename_ct_npy
 second_array_sub = filename_weeklyct_npy
-filename_subtractionct = 'subctionct.npy'
+filename_subtractionct = 'subtractionct.npy'
+
+
+
 # Run whole data_preproc pipeline for a small number of patients, useful for testing
 test_patients_list = None
 # ['0079378','0303865','0401057','0517608','0563941','0765200',
