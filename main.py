@@ -435,16 +435,32 @@ def train(model, train_dataloader, val_dataloader, test_dataloader, mean, std, o
                 arr_list = [plot_inputs[patient_idx][0].cpu() * std[0] + mean[0],
                             plot_inputs[patient_idx][1].cpu() * std[1] + mean[1],
                             plot_inputs[patient_idx][2].cpu()]
+                
+                # ########### some changes in the output ###########
+                # cmap_list = [data_preproc_config.ct_cmap, data_preproc_config.rtdose_cmap,
+                #              data_preproc_config.segmentation_cmap]
                 cmap_list = [data_preproc_config.ct_cmap, data_preproc_config.rtdose_cmap,
-                             data_preproc_config.segmentation_cmap]
+                              data_preproc_config.weeklycd_cmap]
+            
                 # vmin_list = [0, 0, 0]
-                vmin_list = [config.ct_a_min, config.rtdose_a_min, 0]
+                # vmin_list = [config.ct_a_min, config.rtdose_a_min, 0]
+                vmin_list = [config.ct_a_min, config.rtdose_a_min, config.weeklyct_a_min]
+
                 # vmax_list = [1, config.data_preproc_config.rtdose_vmax/config.rtdose_a_max, 1]
-                vmax_list = [config.ct_a_max, config.data_preproc_config.rtdose_vmax, 1]
-                ticks_steps_list = [vmax_list[0] - vmin_list[0], vmax_list[1] - vmin_list[1], 1]
-                segmentation_map_list = [arr_list[2] >= 0.5, None, None]
+                # vmax_list = [config.ct_a_max, config.data_preproc_config.rtdose_vmax, 1]
+                vmax_list = [config.ct_a_max, config.data_preproc_config.rtdose_vmax, config.weeklyct_a_max]
+
+                # ticks_steps_list = [vmax_list[0] - vmin_list[0], vmax_list[1] - vmin_list[1], 1]
+                ticks_steps_list = [vmax_list[0] - vmin_list[0], vmax_list[1] - vmin_list[1], vmax_list[2] - vmin_list[2]]
+
+                # segmentation_map_list = [arr_list[2] >= 0.5, None, None]
+                segmentation_map_list = None
+
+                # colorbar_title_list = [data_preproc_config.ct_colorbar_title, data_preproc_config.rtdose_colorbar_title,
+                #                        data_preproc_config.segmentation_colorbar_title]
                 colorbar_title_list = [data_preproc_config.ct_colorbar_title, data_preproc_config.rtdose_colorbar_title,
-                                       data_preproc_config.segmentation_colorbar_title]
+                                       data_preproc_config.weeklyct_colorbar_title]
+
                 # Overlay
                 overlay_list = [None, None, None]
                 alpha_overlay_list = [None, None, None]
@@ -1147,7 +1163,7 @@ def optuna_objective(trial):
                     misc.save_predictions(patient_ids=test_patient_ids, y_pred_list=test_y_pred_ens,
                                         y_true_list=test_y_ens, mode_list=mode_lr_list, num_classes=num_classes,
                                         model_name=model_name + '_ens', exp_dir=exp_dir, logger=logger)
-
+                # print('hiiiiiiiiiiiiiiii', test_y_lr_sum, num_classes)
                 assert len(set([tuple(x.tolist()) for x in test_y_lr_sum])) == num_classes
                 test_y_pred_lr_ens = [x / cv_folds for x in test_y_pred_lr_sum]
                 test_y_lr_ens = [x / cv_folds for x in test_y_lr_sum]

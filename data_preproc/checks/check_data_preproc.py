@@ -250,13 +250,16 @@ def plot_multiple_arrs(arr_list, overlay_list, alpha_overlay_list, nr_images, fi
             if arr_overlay is not None:
                 im = ax[row, i].imshow(arr_overlay[idx, ...], alpha=alpha_overlay, cmap=cmap_overlay, vmin=vmin_overlay,
                                        vmax=vmax_overlay)
-
-            if segmentation_map_list[row] is not None:
-                for struct in structures:
-                    struct_value = cfg.structures_values[struct]
-                    ax[row, i].contour(segmentation_map_list[row][idx, ...] == struct_value,
-                                       colors=cfg.draw_contour_color,
-                                       linewidths=cfg.draw_contour_linewidth)
+            try: # Change here
+                if segmentation_map_list[row] is not None:
+                    for struct in structures:
+                        struct_value = cfg.structures_values[struct]
+                        ax[row, i].contour(segmentation_map_list[row][idx, ...] == struct_value,
+                                        colors=cfg.draw_contour_color,
+                                        linewidths=cfg.draw_contour_linewidth)
+            except Exception as e:
+                pass
+    
             ax[row, i].axis('off')
 
         plt.tight_layout()

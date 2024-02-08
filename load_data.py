@@ -170,8 +170,14 @@ def get_files(sampling_type, features, filename_stratified_sampling_test_csv, fi
     data_dicts = [ # Some changes here chane segmentation map to weeklyCTs
         {'ct': os.path.join(data_dir, str(label_name), patient_id, data_preproc_config.filename_ct_npy),
          'rtdose': os.path.join(data_dir, str(label_name), patient_id, data_preproc_config.filename_rtdose_npy),
-         'segmentation_map': os.path.join(data_dir, str(label_name), patient_id,
-                                          data_preproc_config.filename_segmentation_map_npy),
+
+        ######## Here I made some changes ########### 
+        #  'segmentation_map': os.path.join(data_dir, str(label_name), patient_id,
+        #                                   data_preproc_config.filename_segmentation_map_npy),
+
+         'weeklyct': os.path.join(data_dir, str(label_name), patient_id,
+                                          data_preproc_config.filename_weeklyct_npy),
+
          'features': feature_name,
          'label': label_name,
          'patient_id': patient_id}
@@ -523,7 +529,7 @@ concat_key
     generic_transforms = Compose([
         LoadImaged(keys=image_keys),
         EnsureTyped(keys=image_keys + ['features', 'label'], data_type='tensor'),
-        # Clip
+        # Clip  ############# This part should be changed #############
         ScaleIntensityRanged(keys=['ct'],
                              a_min=config.ct_a_min, a_max=config.ct_a_max,
                              b_min=config.ct_a_min, b_max=config.ct_a_max,
@@ -534,7 +540,12 @@ concat_key
                              clip=config.rtdose_clip),
         # Useful for creating figures such as attention maps
         # CopyItemsd(keys=['segmentation_map'], names=['segmentation_map_original'], times=1),
-        MapLabelValued(keys=['segmentation_map'], orig_labels=seg_orig_labels, target_labels=seg_target_labels),
+        # MapLabelValued(keys=['segmentation_map'], orig_labels=seg_orig_labels, target_labels=seg_target_labels), This one should be added for 
+        ScaleIntensityRanged(keys=['weeklyct'],
+                             a_min=config.weeklyct_a_min, a_max=config.weeklyct_a_max,
+                             b_min=config.weeklyct_a_min, b_max=config.weeklyct_a_max,
+                             clip=config.weeklyct_clip),
+        # Useful for creating figures such as attention         
         ConcatItemsd(keys=image_keys, name=concat_key, dim=0),
         DeleteItemsd(keys=image_keys),
     ])

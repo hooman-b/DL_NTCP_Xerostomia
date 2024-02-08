@@ -101,7 +101,7 @@ segmentation_structures = data_preproc_config.structures_uncompound_list
 # only parotid and submandibulars. We can consider multiple list of structures by adding them using the '+' operator.
 
 # Data preprocessing config: load_data.py
-image_keys = ['ct', 'rtdose', 'segmentation_map']  # Do not change
+image_keys = ['ct', 'rtdose', 'weeklyct']  # Do not change
 concat_key = 'ct_dose_seg'  # Do not change
 perform_data_aug = True
 rand_cropping_size = [96, 96, 96]  # (REDUNDANT)  # OLD [100, 100, 100]  # (only for training data)
@@ -124,6 +124,7 @@ rtdose_clip = True
 # segmentation_map_a_max = 1.0
 # segmentation_map_b_min = 0.0
 # segmentation_map_b_max = 1.0
+
 # The value of element `i` in `seg_orig_labels` (e.g. value=1) will be mapped to the value of element `i`
 # in `seg_target_labels` (e.g. value=2)
 # Advice: use the order as ['background'] + data_preproc_config.structures_uncompound_list = \
@@ -303,3 +304,37 @@ def make_clinical_features(features):
 
 optuna_features_dl_list = [[]]#[['xer_wk1_not_at_all', 'xer_wk1_little', 'xer_wk1_moderate_to_severe', 'sex', 'age']] #[[] , ['xer_wk1_not_at_all', 'xer_wk1_little', 'xer_wk1_moderate_to_severe', 'sex', 'age']]
 print(optuna_features_dl_list)
+
+
+# Write about the changes I should make in the code to use the WeeklyCT Images.
+# Line 537 load_data:
+# change 'MapLabelValued' to 'ScaleIntensityRanged' and instead of 'segmentation maps',
+# I need to use 'weeklyCTs'
+# 
+# Line 173 load_data:
+# change 'segmentation_map' into 'weeklyct' label and alse the direction to weeklyCTs.
+# it may change other properties. I will add them here as well.
+#
+# Line 50 process_data:
+# I add 'ScaleIntensityRange' for weeklyCTs here and add it to the rest of the code,
+# But for segmentation_map nothing should be added.
+#
+# Line 226 process_data
+# I changed the augmentation method from segmentation map to weeklyCTs and I am using
+# bilinear as used for CT.
+#
+# Line 440 main
+# Change some ioutputs in the result part. instead of using segmentation maps,
+# I am using information for weeklyCTs.
+
+
+# WEEKLYCT PARAMETERS
+# WEEKLYCT
+weeklyct_a_min = -200  
+weeklyct_a_max = 400  
+weeklyct_b_min = 0.0
+weeklyct_b_max = 1.0
+weeklyct_clip = True
+
+weeklyct_interpol_mode_2d = 'bilinear'
+weeklyct_interpol_mode_3d = 'trilinear'

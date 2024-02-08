@@ -315,6 +315,8 @@ weeklyct_dir = '//zkh/appdata/RTDicom/Projectline_HNC_modelling/OPC_data/ART Hoo
 weeklyct_folder_name = 'w3CT_reg_bsl' # Name of the folder one saved all the regisered weeklyCTs in.
 filename_weeklyct_metadata_json = 'weeklyct_metadata.json'  # meta-data of the WeeklyCT data
 filename_weeklyct_npy = 'weeklyct.npy'  # WeeklyCT (Numpy array)
+weeklycd_cmap = 'gray'
+weeklyct_colorbar_title = 'HU'
 
 # Run whole data_preproc pipeline for a small number of patients, useful for testing
 test_patients_list = None
