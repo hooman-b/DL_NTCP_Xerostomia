@@ -167,7 +167,7 @@ filename_main_logging_txt = 'main_logging.txt'
 # data_preproc.py: filename_endpoints_csv
 # Hooman: Here I am adding some adjustmemnts base on my endpoint CSV file.
 patient_id_col =  'ID' #'PatientID'
-endpoint = 'xer_06' #'HN35_Xerostomia_M12_class'
+endpoint = 'xer_12' #'HN35_Xerostomia_M12_class'
 baseline_col = 'xer_wk1' #'HN35_Xerostomia_W01_class'
 
 submodels_features =  [
